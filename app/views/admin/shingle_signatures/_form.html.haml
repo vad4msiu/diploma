@@ -1,0 +1,30 @@
+.group
+  = f.label :token, t("activerecord.attributes.shingle_signature.token", :default => "Token"), :class => :label
+  = f.text_field :token, :class => 'text_field'
+  %span.description Ex: a simple text
+.group
+  = f.label :canonized_content, t("activerecord.attributes.shingle_signature.canonized_content", :default => "Canonized content"), :class => :label
+  = f.text_area :canonized_content, :class => 'text_area'
+  %span.description Ex: a simple text
+.group
+  = f.label :content, t("activerecord.attributes.shingle_signature.content", :default => "Content"), :class => :label
+  = f.text_area :content, :class => 'text_area'
+  %span.description Ex: a simple text
+.group
+  = f.label :position_start, t("activerecord.attributes.shingle_signature.position_start", :default => "Position start"), :class => :label
+  = f.number_field :position_start, :class => 'number_field'
+  %span.description Ex: a simple text
+.group
+  = f.label :position_end, t("activerecord.attributes.shingle_signature.position_end", :default => "Position end"), :class => :label
+  = f.number_field :position_end, :class => 'number_field'
+  %span.description Ex: a simple text
+.group
+  = f.label :document_id, t("activerecord.attributes.shingle_signature.document_id", :default => "Document"), :class => :label
+  = f.number_field :document_id, :class => 'number_field'
+  %span.description Ex: a simple text
+.group.navform.wat-cf
+  %button.button{:type => "submit"}
+    = image_tag("web-app-theme/icons/tick.png", :alt => "#{t("web-app-theme.save", :default => "Save")}")
+    = t("web-app-theme.save", :default => "Save")
+  %span.text_button_padding= t("web-app-theme.or", :default => "or")
+  = link_to t("web-app-theme.cancel", :default => "Cancel"), admin_shingle_signatures_path, :class => "text_button_padding link_button"

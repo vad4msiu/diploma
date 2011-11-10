@@ -1,0 +1,11 @@
+.block
+  .content
+    %h2.title Сheck the similarity (Shingles)
+    .inner
+      = form_tag admin_check_similarity_shingles_path, :class => 'form' do
+        .group
+          = text_area_tag :content, params[:content], :class => 'text_area', :rows => 20
+        .group.navform.wat-cf
+          %button.button{:type => "submit"}
+            = image_tag("web-app-theme/icons/tick.png")
+            Check

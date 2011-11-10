@@ -1,0 +1,33 @@
+.block
+  .secondary-navigation
+    %ul.wat-cf
+      %li.first.active= link_to "#{t("web-app-theme.list", :default => "List")}", admin_words_path
+      %li= link_to "#{t("web-app-theme.new", :default => "New")}", new_admin_word_path
+  .content
+    %h2.title
+      = t("web-app-theme.all", :default => "All")
+      Words
+    .inner
+      %table.table
+        %tr
+          %th.first ID
+          %th
+            = t("activerecord.attributes.admin_word.term", :default => t("activerecord.labels.term", :default => "Term"))
+          %th number_documents_found
+          %th IDF
+          %th.last &nbsp;
+        - @words.each do |word|
+          %tr{:class => cycle("odd", "even")}
+            %td= word.id
+            %td= link_to word.term, admin_word_path(word)
+            %td= word.number_documents_found
+            %td= word.idf
+            %td.last
+              = link_to "#{t("web-app-theme.show", :default => "Show")}", admin_word_path(word)
+              |
+              \#{link_to "#{t("web-app-theme.edit", :default => "Edit")}", edit_admin_word_path(word)} |
+              \#{link_to "#{t("web-app-theme.delete", :default => "Delete")}", admin_word_path(word), :method => :delete, :confirm => "#{t("web-app-theme.confirm", :default => "Are you sure?")}"}
+      .actions-bar.wat-cf
+        .actions
+        = will_paginate @words
+- content_for :sidebar, render(:partial => 'sidebar')

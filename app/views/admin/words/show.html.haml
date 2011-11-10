@@ -1,0 +1,27 @@
+.block
+  .secondary-navigation
+    %ul.wat-cf
+      %li.first= link_to "#{t("web-app-theme.list", :default => "List")}", admin_words_path
+      %li= link_to "#{t("web-app-theme.new", :default => "New")}", new_admin_word_path
+      %li.active= link_to "#{t("web-app-theme.show", :default => "Show")}", admin_word_path
+  .content
+    .inner
+      %p
+        %b
+          = t("activerecord.attributes.admin_word.term", :default => t("activerecord.labels.term", :default => "Term"))
+          \:
+        = @word.term
+      %p
+        %b
+          = t("activerecord.attributes.admin_word.number_documents_found", :default => t("activerecord.labels.number_documents_found", :default => "Number documents found"))
+          \:
+        = @word.number_documents_found
+      %p
+        %b
+          = t("activerecord.attributes.admin_word.idf", :default => t("activerecord.labels.idf", :default => "Idf"))
+          \:
+        = @word.idf
+      .wat-cf
+        = link_to image_tag("web-app-theme/icons/application_edit.png", :alt => "#{t("web-app-theme.edit", :default=> "Edit")}") + " " + t("web-app-theme.edit", :default=> "Edit"), edit_admin_word_path(@word), :class => "button"
+        = link_to image_tag("web-app-theme/icons/cross.png", :alt => "#{t("web-app-theme.delete", :default=> "Delete")}") + " " + t("web-app-theme.delete", :default => "Delete"), admin_word_path(@word), :method => "delete", :class => "button", :confirm => "#{t("web-app-theme.confirm", :default => "Are you sure?")}"
+- content_for :sidebar, render(:partial => 'sidebar')

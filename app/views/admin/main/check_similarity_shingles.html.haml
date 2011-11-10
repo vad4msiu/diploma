@@ -1,0 +1,7 @@
+.block
+  .content
+    %h2.title Сheck the similarity
+    .inner
+      = raw @document.content_after_check
+      %h3.title= "Similarity #{@document.similarity} %"
+      - content_for :sidebar, render(:partial => 'sidebar')

@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/Fixtures.html
+
+one:
+  token: MyString
+  document_id: 1
+
+two:
+  token: MyString
+  document_id: 1

@@ -1,0 +1,34 @@
+.block
+  .secondary-navigation
+    %ul.wat-cf
+      %li.first.active= link_to "#{t("web-app-theme.list", :default => "List")}", admin_mega_shingle_signatures_path
+      %li= link_to "#{t("web-app-theme.new", :default => "New")}", new_admin_mega_shingle_signature_path
+  .content
+    %h2.title
+      = t("web-app-theme.all", :default => "All")
+      MegaShingleSignatures
+    .inner
+      %table.table
+        %tr
+          %th.first ID
+          %th
+            = t("activerecord.attributes.admin_mega_shingle_signature.token", :default => t("activerecord.labels.token", :default => "Token"))
+          %th= t("web-app-theme.created_at", :default => "Created at")
+          %th.last &nbsp;
+        - @mega_shingle_signatures.each do |mega_shingle_signature|
+          %tr{:class => cycle("odd", "even")}
+            %td
+              = mega_shingle_signature.id
+            %td
+              = link_to mega_shingle_signature.token, admin_mega_shingle_signature_path(mega_shingle_signature)
+            %td
+              = mega_shingle_signature.created_at
+            %td.last
+              = link_to "#{t("web-app-theme.show", :default => "Show")}", admin_mega_shingle_signature_path(mega_shingle_signature)
+              |
+              \#{link_to "#{t("web-app-theme.edit", :default => "Edit")}", edit_admin_mega_shingle_signature_path(mega_shingle_signature)} |
+              \#{link_to "#{t("web-app-theme.delete", :default => "Delete")}", admin_mega_shingle_signature_path(mega_shingle_signature), :method => :delete, :confirm => "#{t("web-app-theme.confirm", :default => "Are you sure?")}"}
+      .actions-bar.wat-cf
+        .actions
+        = will_paginate @mega_shingle_signatures
+- content_for :sidebar, render(:partial => 'sidebar')

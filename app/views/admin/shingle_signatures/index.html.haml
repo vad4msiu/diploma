@@ -1,0 +1,31 @@
+.block
+  .secondary-navigation
+    %ul.wat-cf
+      %li.first.active= link_to "#{t("web-app-theme.list", :default => "List")}", admin_shingle_signatures_path
+      %li= link_to "#{t("web-app-theme.new", :default => "New")}", new_admin_shingle_signature_path
+  .content
+    %h2.title
+      = t("web-app-theme.all", :default => "All")
+      shingle_signatures
+    .inner
+      %table.table
+        %tr
+          %th.first ID
+          %th
+            = t("activerecord.attributes.admin_shingle_signature.token", :default => t("activerecord.labels.token", :default => "Token"))
+          %th.last &nbsp;
+        - @shingle_signatures.each do |shingle_signature|
+          %tr{:class => cycle("odd", "even")}
+            %td
+              = shingle_signature.id
+            %td
+              = link_to shingle_signature.document.content[shingle_signature.position_start..shingle_signature.position_end], admin_shingle_signature_path(shingle_signature)
+            %td.last
+              = link_to "#{t("web-app-theme.show", :default => "Show")}", admin_shingle_signature_path(shingle_signature)
+              |
+              \#{link_to "#{t("web-app-theme.edit", :default => "Edit")}", edit_admin_shingle_signature_path(shingle_signature)} |
+              \#{link_to "#{t("web-app-theme.delete", :default => "Delete")}", admin_shingle_signature_path(shingle_signature), :method => :delete, :confirm => "#{t("web-app-theme.confirm", :default => "Are you sure?")}"}
+      .actions-bar.wat-cf
+        .actions
+        = will_paginate @shingle_signatures
+- content_for :sidebar, render(:partial => 'sidebar')

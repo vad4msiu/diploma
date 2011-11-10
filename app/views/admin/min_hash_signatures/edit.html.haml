@@ -1,0 +1,14 @@
+.block
+  .secondary-navigation
+    %ul.wat-cf
+      %li.first= link_to "#{t("web-app-theme.list", :default => "List")}", admin_min_hash_signatures_path
+      %li= link_to "#{t("web-app-theme.new", :default => "New")}", new_admin_min_hash_signature_path
+      %li.active= link_to "#{t("web-app-theme.edit", :default => "Edit")}", edit_admin_min_hash_signature_path
+  .content
+    %h2.title
+      = t("web-app-theme.edit", :default => "Edit")
+      MinHashSignature
+    .inner
+      = form_for @min_hash_signature, :url => admin_min_hash_signature_path(@min_hash_signature), :html => { :class => :form } do |f|
+        = render :partial => "form", :locals => {:f => f}
+- content_for :sidebar, render(:partial => 'sidebar')

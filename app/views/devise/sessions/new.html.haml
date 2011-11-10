@@ -1,0 +1,23 @@
+#block-login.block
+  %h2 Войти
+  .content.login
+    - if notice
+      .flash
+        .message.notice
+          %p= notice
+    = form_for(resource, :as => resource_name, :url => session_path(resource_name), :html => {:class => 'form login'}) do |f|
+      .group.wat-cf
+        .left
+          = f.label :email, :class => 'label right'
+        .right
+          = f.email_field :email, :class => 'text_field'
+      .group.wat-cf
+        .left
+          = f.label :password, :class => 'label right'
+        .right
+          = f.password_field :password, :class => "text_field"
+      .group.navform.wat-cf
+        .right
+          %button.button{:type => "submit"}
+            = image_tag("web-app-theme/themes/default/images/key.png")
+            Войти
