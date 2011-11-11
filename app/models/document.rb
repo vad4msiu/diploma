@@ -9,45 +9,39 @@ class Document < ActiveRecord::Base
   validates :content, :presence => true
 
   after_create :create_signatures
-  
+
   def create_signatures
-    create_super_shingle_signatures
     create_shingle_signatures
-    create_i_match_signatures
     create_min_hash_signatures
-    update_dictionary
+    create_super_shingle_signatures
+    create_mega_shingle_signatures
+    # create_i_match_signatures
+    # update_dictionary
   end
 
   def update_dictionary
     Dictionary.update(self.content)
   end
   
+  def build_mega_shingle_signatures
+    generate_combinations_for_mega_shingle do |mega_shingle|
+      self.mega_shingle_signatures.new(:token => Digest::MD5.hexdigest(mega_shingle.join))
+    end
+    Rails.logger.debug { "message: #{self.mega_shingle_signatures.map &:token}" }
+  end
+  
   def build_super_shingle_signatures
-    shingling = Resemblance::Shingling.new(
-      self.content,
-      :stop_words => Text::STOP_WORDS,
-      :shingle_length => ShingleSignature::SHNINGLE_LENGTH
-    )
-
-    signatures = Resemblance::MinHash.new(shingling.shingles, :function_count => 84).signatures
-    
-    self.super_shingle_signatures.new(:token => Resemblance::Hashing.signature(signatures[0...14].join))
-    self.super_shingle_signatures.new(:token => Resemblance::Hashing.signature(signatures[14...28].join))
-    self.super_shingle_signatures.new(:token => Resemblance::Hashing.signature(signatures[28...42].join))
-    self.super_shingle_signatures.new(:token => Resemblance::Hashing.signature(signatures[42...56].join))
-    self.super_shingle_signatures.new(:token => Resemblance::Hashing.signature(signatures[56...70].join))
-    self.super_shingle_signatures.new(:token => Resemblance::Hashing.signature(signatures[70...84].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[0...14].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[14...28].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[28...42].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[42...56].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[56...70].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[70...84].join))
   end
 
   def build_min_hash_signatures
-    shingling = Resemblance::Shingling.new(
-      self.content,
-      :stop_words => Text::STOP_WORDS,
-      :shingle_length => ShingleSignature::SHNINGLE_LENGTH
-    )
-
-    Resemblance::MinHash.new(shingling.shingles).signatures.map do |signature|
-      self.min_hash_signatures.new(:token => signature)
+    MinWise::find_min(shingle_signatures.map(&:token)).each do |min|
+      self.min_hash_signatures.new(:token => Digest::MD5.hexdigest(min.to_s ))
     end
   end
 
@@ -64,31 +58,35 @@ class Document < ActiveRecord::Base
         :position_start => position_start,
         :position_end => position_end
       )
-    enda
+    end
   end
 
-  def build_i_match_signatures
-    current_words = self.content.split(/[^А-Яа-яA-Za-z]+/).to_set
-    global_words = Word.where(:idf => Dictionary::MIN_IDF..Dictionary::MAX_IDF).map(&:term).to_set
-    self.i_match_signatures.new(:token => Resemblance::Hashing.signature((current_words & global_words).to_a.sort.join(" ")))
-  end
-  
+  # def build_i_match_signatures
+  #   current_words = self.content.split(/[^А-Яа-яA-Za-z]+/).to_set
+  #   global_words = Word.where(:idf => Dictionary::MIN_IDF..Dictionary::MAX_IDF).map(&:term).to_set
+  #   self.i_match_signatures.new(:token => Resemblance::Hashing.signature((current_words & global_words).to_a.sort.join(" ")))
+  # end
+
   def similarity_super_shingle_signatures
     Document.joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
   end
 
+  def similarity_mega_shingle_signatures
+    Document.joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+  end
+  
   def similarity_min_hash_signatures
     equal_count = 0.0
     documents = Document.joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
-
+  
     documents.each do |document|
-      Resemblance::MinHash::FUNCTION_COUNT.times do |i|
+      MinWise::FUNCTION_NUMBER.times do |i|
         equal_count += 1 if min_hash_signatures[i].token.to_s == document.min_hash_signatures[i].token.to_s
       end
-      document.similarity = equal_count / Resemblance::MinHash::FUNCTION_COUNT * 100
+      document.similarity = equal_count / MinWise::FUNCTION_NUMBER * 100
       equal_count = 0.0
     end
-
+  
     documents
   end
 
@@ -195,20 +193,47 @@ class Document < ActiveRecord::Base
   def create_super_shingle_signatures
     self.build_super_shingle_signatures
     self.super_shingle_signatures.map(&:save)
+  end
+  
+  def create_mega_shingle_signatures
+    self.build_mega_shingle_signatures
+    self.mega_shingle_signatures.map(&:save)
   end  
-
+  
   def create_min_hash_signatures
     self.build_min_hash_signatures
     self.min_hash_signatures.map(&:save)
   end
-
-  def create_i_match_signatures
-    self.build_i_match_signatures
-    self.i_match_signatures.map(&:save)
-  end
+  #
+  # def create_i_match_signatures
+  #   self.build_i_match_signatures
+  #   self.i_match_signatures.map(&:save)
+  # end
 
   def create_shingle_signatures
     self.build_shingle_signatures
     self.shingle_signatures.map(&:save)
+  end
+  
+  private
+  
+  def generate_combinations_for_mega_shingle
+    array = self.super_shingle_signatures.map(&:token)
+    r = 2
+    n = array.length
+    indices = (0...r).to_a
+    final = (n - r...n).to_a
+    while indices != final
+      yield indices.map {|k| array[k]}
+      i = r - 1
+      while indices[i] == n - r + i
+        i -= 1
+      end
+      indices[i] += 1
+      (i + 1...r).each do |j|
+        indices[j] = indices[i] + j - i
+      end
+    end
+    yield indices.map {|k| array[k]}
   end
 end

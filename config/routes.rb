@@ -12,8 +12,11 @@ Diploma::Application.routes.draw do
     get 'similarity_super_shingles' => "main#similarity_super_shingles"
     post 'check_similarity_super_shingles' => "main#check_similarity_super_shingles"
 
-    get 'similarity_sim_hash' => "main#similarity_sim_hash"
-    post 'check_similarity_sim_hash' => "main#check_similarity_sim_hash"    
+    get 'similarity_mega_shingles' => "main#similarity_mega_shingles"
+    post 'check_similarity_mega_shingles' => "main#check_similarity_mega_shingles"    
+
+    get 'similarity_min_hash' => "main#similarity_min_hash"
+    post 'check_similarity_min_hash' => "main#check_similarity_min_hash"    
     
     get 'similarity_i_match' => "main#similarity_i_match"
     post 'check_similarity_i_match' => "main#check_similarity_i_match"
@@ -22,6 +25,7 @@ Diploma::Application.routes.draw do
     resources :i_match_signatures
     resources :shingle_signatures
     resources :super_shingle_signatures
+    resources :mega_shingle_signatures
     resources :min_hash_signatures
     resources :words
   end

@@ -9,7 +9,7 @@
     #container
       #header
         %h1
-          %a{:href => "/"} Diplom
+          %a{:href => "/"} Проверка на заимствование
         / #user-navigation
         /   %ul.wat-cf
         /     %li
@@ -18,15 +18,31 @@
         /       %a{:href => "#"}= t("web-app-theme.settings", :default => "Settings")
         /     %li
         /       %a.logout{:href => "/logout"}= t("web-app-theme.logout", :default => "Logout")
+        %br
+        %br
+        %br
+        %br
         #main-navigation
           %ul.wat-cf
             %li
-              = link_to 'Сheck the similarity (Shingles)', admin_similarity_shingles_path
-            %li
-              = link_to 'Сheck the similarity (SimHash)', admin_similarity_sim_hash_path
-            %li
-              = link_to 'Сheck the similarity (SuperShingle)', admin_similarity_super_shingles_path
+              %span{:style => "color:white"}
+                Проверка с помощью:
           
+          %ul.wat-cf
+            %li
+              = link_to 'Shingle', admin_similarity_shingles_path
+            %li
+              = link_to 'MinHash', admin_similarity_min_hash_path
+            %li
+              = link_to 'SuperShingle', admin_similarity_super_shingles_path
+            %li
+              = link_to 'MegaShingle', admin_similarity_mega_shingles_path
+          %ul.wat-cf
+            %li
+              %span{:style => "color:white"}
+                База данных:
+          
+          %ul.wat-cf
             / %li
             /   = link_to 'Сheck the similarity (I-Match)', admin_similarity_i_match_path            
             %li
@@ -34,10 +50,13 @@
             %li
               = link_to 'Shingle signatures', admin_shingle_signatures_path
             %li
-              = link_to 'SimHash signatures', admin_min_hash_signatures_path
-            %li
               = link_to 'Super shingle signatures', admin_super_shingle_signatures_path
+            %li
+              = link_to 'Mega shingle signatures', admin_mega_shingle_signatures_path
           
+            %li
+              = link_to 'MinHash signatures', admin_min_hash_signatures_path
+        
             / %li
             /   = link_to 'Words', admin_words_path
             / %li
