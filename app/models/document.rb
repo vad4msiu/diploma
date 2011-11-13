@@ -27,21 +27,21 @@ class Document < ActiveRecord::Base
     generate_combinations_for_mega_shingle do |mega_shingle|
       self.mega_shingle_signatures.new(:token => Digest::MD5.hexdigest(mega_shingle.join))
     end
-    Rails.logger.debug { "message: #{self.mega_shingle_signatures.map &:token}" }
   end
   
   def build_super_shingle_signatures
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[0...14].join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[14...28].join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[28...42].join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[42...56].join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[56...70].join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[70...84].join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[0...14].map(&:token).join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[14...28].map(&:token).join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[28...42].map(&:token).join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[42...56].map(&:token).join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[56...70].map(&:token).join))
+    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[70...84].map(&:token).join))
   end
 
   def build_min_hash_signatures
+    
     MinWise::find_min(shingle_signatures.map(&:token)).each do |min|
-      self.min_hash_signatures.new(:token => Digest::MD5.hexdigest(min.to_s ))
+      self.min_hash_signatures.new(:token => Digest::MD5.hexdigest(min.to_s))
     end
   end
 
@@ -49,7 +49,8 @@ class Document < ActiveRecord::Base
     shingling = Resemblance::Shingling.new(
       self.content,
       :stop_words => Text::STOP_WORDS,
-      :shingle_length => ShingleSignature::SHNINGLE_LENGTH
+      :shingle_length => ShingleSignature::SHNINGLE_LENGTH,
+      :downcase => true
     )
 
     shingling.each_shingles do |shingle, position_start, position_end|
@@ -68,7 +69,7 @@ class Document < ActiveRecord::Base
   # end
 
   def similarity_super_shingle_signatures
-    Document.joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+    Document.joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => self.super_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
   end
 
   def similarity_mega_shingle_signatures

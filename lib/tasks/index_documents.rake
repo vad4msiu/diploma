@@ -11,13 +11,13 @@ namespace :documents do
       Find.find(ENV["DIR"]) do |file_path|
         if FileTest.file?(file_path)
           puts "Processed file #{file_path}"
-          Document.create :content => File.open(file_path).read.downcase          
+          Document.create :content => File.open(file_path).read
         end
       end
     end
-    
+
     # results = RubyProf.stop
-    # 
+    #
     # File.open "tmp/profile-graph.html", 'w' do |file|
     #  RubyProf::GraphHtmlPrinter.new(results).print(file)
     # end
