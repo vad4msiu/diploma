@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.1.0'
+gem 'rails', '3.1.1'
 
 # Bundle edge Rails instead:
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
@@ -15,6 +15,7 @@ gem 'ruby_parser'
 gem 'unicode'
 gem 'ruby-prof'
 gem 'will_paginate', '~> 3.0'
+
 # gem 'resemblance', :git => 'http://github.com/vad4msiu/resemblance.git'
 
 
