@@ -1,8 +1,0 @@
-.block
-  .content
-    %h2.title Сheck the similarity
-    .inner
-      = raw @document.content      
-      %h3.title= "Similarity "
-      - @documents.each do |document|
-        = "Document id : #{document.id} - #{document.similarity}"

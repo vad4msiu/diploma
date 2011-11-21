@@ -6,6 +6,8 @@
       %li.active= link_to "#{t("web-app-theme.show", :default => "Show")}", admin_shingle_signature_path
   .content
     .inner
+      = raw @shingle_signature.document.content[0...@shingle_signature.position_start]  + "<span class='highlight'>" + @shingle_signature.document.content[@shingle_signature.range] + "</span>" + @shingle_signature.document.content[@shingle_signature.position_end..@shingle_signature.document.content.length]
+
       %p
         %b
           = t("activerecord.attributes.admin_shingle_signature.token", :default => t("activerecord.labels.token", :default => "Token"))

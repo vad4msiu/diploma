@@ -1,11 +1,17 @@
 .block
   .content
-    %h2.title Проверка документа
+    %h2.title Проверка текста на заимствование
     .inner
       = form_tag admin_check_similarity_path, :class => 'form' do
         .group
+          = label :type, "с помощью:", :class => 'label'
+        .group
+          = select_tag :type, options_for_select(%w(shingle super-shingle mega-shingle min-hash i-match).map {|i| [i, i]})
+      
+        .group
           = text_area_tag :content, params[:content], :class => 'text_area', :rows => 20
+          
         .group.navform.wat-cf
           %button.button{:type => "submit"}
-            = image_tag("web-app-theme/icons/tick.png")
-            Check
+            = image_tag("/web-app-theme/icons/tick.png")
+            Проверить

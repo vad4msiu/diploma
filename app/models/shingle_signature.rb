@@ -7,7 +7,11 @@ class ShingleSignature < ActiveRecord::Base
   validates :position_start, :presence => true, :numericality => true
   validates :position_end, :presence => true, :numericality => true
   
-  # def content
-  #   self.document.content[self.position_start..self.position_end]
-  # end
+  def range
+    self.position_start..self.position_end
+  end
+  
+  def cut_content
+    self.document.content[range]
+  end
 end

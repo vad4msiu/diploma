@@ -3,7 +3,41 @@ class Admin::MainController < ApplicationController
   before_filter :authenticate_user!
   layout "admin"
 
-  def similarity_shingles
+  def index
+
+  end
+
+  def check_similarity
+    @document = Document.new :content => params[:content]
+    case params[:type]
+    when 'shingle'
+      @document.build_shingle_signatures
+      @document.similarity_shingle_signatures
+      render 'admin/main/types/shingle'
+    when 'super-shingle'
+      @document.build_shingle_signatures
+      @document.build_min_hash_signatures
+      @document.build_super_shingle_signatures
+      @documents = @document.similarity_super_shingle_signatures
+      render 'admin/main/types/default'
+    when 'mega-shingle'
+      @document.build_shingle_signatures
+      @document.build_min_hash_signatures
+      @document.build_super_shingle_signatures
+      @document.build_mega_shingle_signatures
+      @documents = @document.similarity_mega_shingle_signatures
+      render 'admin/main/types/default'
+    when 'min-hash'
+      @document.build_shingle_signatures
+      @document.build_min_hash_signatures
+      @documents = @document.similarity_min_hash_signatures
+      render 'admin/main/types/default'
+    when 'i-match'
+      @document = Document.new :content => params[:content]
+      @document.build_i_match_signatures
+      @documents = @document.similarity_i_match_signatures
+      render 'admin/main/types/default'
+    end
   end
 
   def check_similarity_shingles
@@ -22,7 +56,7 @@ class Admin::MainController < ApplicationController
     @document.build_super_shingle_signatures
     @documents = @document.similarity_super_shingle_signatures
   end
-  
+
   def similarity_mega_shingles
   end
 
@@ -34,7 +68,7 @@ class Admin::MainController < ApplicationController
     @document.build_mega_shingle_signatures
     @documents = @document.similarity_mega_shingle_signatures
   end
-  
+
 
   def similarity_i_match
   end

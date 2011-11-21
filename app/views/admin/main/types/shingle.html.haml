@@ -1,0 +1,8 @@
+.block
+  .content
+    %h2.title Отчет
+    .inner
+      = raw @document.content_after_check
+      %h3.title= "Схожесть #{@document.similarity} %"
+      - content_for :sidebar do
+        = raw @document.similar_documents_after_check

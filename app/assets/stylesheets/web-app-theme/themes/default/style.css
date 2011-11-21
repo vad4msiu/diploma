@@ -71,7 +71,7 @@ hr {
 }
 
 #main {
-  width: 77%;
+  width: 50%;
   float: left;
 }
 #main .block {
@@ -190,7 +190,7 @@ hr {
 }
 
 #sidebar {
-  width: 20%;
+  width: 45%;
   float: right;
 }
 #sidebar .block {
@@ -462,12 +462,16 @@ a.button:active, button.button:active {
   float: right;
 }
 
-span.hide {
+.hide {
 	display:none;
 }
 
-span.highlight{
+.highlight{
 	background-color: #FFDEAD;	
+}
+
+
+.inner .highlight{
 	text-decoration:underline;
 }
 

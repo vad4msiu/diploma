@@ -1,15 +1,17 @@
 # -*- encoding : utf-8 -*-
 class Document < ActiveRecord::Base
-  has_many :shingle_signatures, :dependent => :destroy
-  has_many :i_match_signatures, :dependent => :destroy
+  has_many :shingle_signatures, :dependent => :destroy, :order => 'id'
+  has_many :i_match_signatures, :dependent => :destroy, :order => 'id'
   has_many :min_hash_signatures, :dependent => :destroy, :order => 'id'
-  has_many :super_shingle_signatures, :dependent => :destroy
-  has_many :mega_shingle_signatures, :dependent => :destroy
+  has_many :super_shingle_signatures, :dependent => :destroy, :order => 'id'
+  has_many :mega_shingle_signatures, :dependent => :destroy, :order => 'id'
 
   validates :content, :presence => true
 
   after_create :create_signatures
-
+  
+  attr_accessor :similar_documents_after_check
+  
   def create_signatures
     create_shingle_signatures
     create_min_hash_signatures
@@ -18,43 +20,39 @@ class Document < ActiveRecord::Base
     # create_i_match_signatures
     # update_dictionary
   end
-
-  def update_dictionary
-    Dictionary.update(self.content)
-  end
   
   def build_mega_shingle_signatures
     generate_combinations_for_mega_shingle do |mega_shingle|
-      self.mega_shingle_signatures.new(:token => Digest::MD5.hexdigest(mega_shingle.join))
+      mega_shingle_signatures.new(:token => Digest::MD5.hexdigest(mega_shingle.join))
     end
   end
   
   def build_super_shingle_signatures
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[0...14].map(&:token).join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[14...28].map(&:token).join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[28...42].map(&:token).join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[42...56].map(&:token).join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[56...70].map(&:token).join))
-    self.super_shingle_signatures.new(:token => Digest::MD5.hexdigest(self.min_hash_signatures[70...84].map(&:token).join))
+    super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[0...14].map(&:token).join))
+    super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[14...28].map(&:token).join))
+    super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[28...42].map(&:token).join))
+    super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[42...56].map(&:token).join))
+    super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[56...70].map(&:token).join))
+    super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[70...84].map(&:token).join))
   end
 
   def build_min_hash_signatures
     
     MinWise::find_min(shingle_signatures.map(&:token)).each do |min|
-      self.min_hash_signatures.new(:token => Digest::MD5.hexdigest(min.to_s))
+      min_hash_signatures.new(:token => Digest::MD5.hexdigest(min.to_s))
     end
   end
 
   def build_shingle_signatures
     shingling = Resemblance::Shingling.new(
-      self.content,
+      content,
       :stop_words => Text::STOP_WORDS,
       :shingle_length => ShingleSignature::SHNINGLE_LENGTH,
       :downcase => true
     )
 
     shingling.each_shingles do |shingle, position_start, position_end|
-      self.shingle_signatures.new(
+      shingle_signatures.new(
         :token => Digest::MD5.hexdigest(shingle),
         :position_start => position_start,
         :position_end => position_end
@@ -62,15 +60,18 @@ class Document < ActiveRecord::Base
     end
   end
 
-  # def build_i_match_signatures
-  #   current_words = self.content.split(/[^А-Яа-яA-Za-z]+/).to_set
-  #   global_words = Word.where(:idf => Dictionary::MIN_IDF..Dictionary::MAX_IDF).map(&:term).to_set
-  #   self.i_match_signatures.new(:token => Resemblance::Hashing.signature((current_words & global_words).to_a.sort.join(" ")))
-  # end
+  def build_i_match_signatures
+    current_words = content.split(/[^[:word:]]+/).to_set
+    i_match_signatures.new(:token => Digest::MD5.hexdigest((current_words & Word.where(:idf => 2..4).map(&:term).to_set).to_a.sort.join))
+  end
 
   def similarity_super_shingle_signatures
-    Document.joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => self.super_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+    Document.joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
   end
+
+  def similarity_i_match_signatures
+    Document.joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+  end  
 
   def similarity_mega_shingle_signatures
     Document.joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
@@ -90,41 +91,94 @@ class Document < ActiveRecord::Base
   
     documents
   end
+  
+  def similar_shingle_signatures
+    ShingleSignature.where(:token => shingle_signatures.map(&:token))
+  end
 
+  # Кромешный АД
   def similarity_shingle_signatures
-    document_match = {}
+    buffer_shingle_signatures = []
     ranges_shingle_signatures_match = []
     prev_range_last = 0
     number_matched_shingle_signatures = 0
-    buffer_range = shingle_signatures.first.position_start..shingle_signatures.first.position_end
-    prev_docuemnt = self
-
-    self.shingle_signatures.each do |shingle_signature|
+    prev_document_id = nil
+    similar_documents = []
+    buffer_range = nil
+    similar_shingle_signatures = {}
+    shingle_match = nil
+    
+    shingle_signatures.each do |shingle_signature|
       range = shingle_signature.position_start..shingle_signature.position_end
       if shingle_match = ShingleSignature.find_by_token(shingle_signature.token.to_s)
+        buffer_range ||= shingle_signature.range
+        prev_document_id ||= shingle_match.document.id
         number_matched_shingle_signatures += 1
-        if tmp = (buffer_range | range)
+
+        if (tmp = (buffer_range | range)) && prev_document_id == shingle_match.document.id
           buffer_range = tmp
         else
-          ranges_shingle_signatures_match << buffer_range
+          similar_documents << prev_document_id
+          ranges_shingle_signatures_match << buffer_range          
           buffer_range = range
         end
-        prev_docuemnt = shingle_match.document
+        
+        if similar_shingle_signatures.has_key?(shingle_match.document)
+          similar_shingle_signatures[shingle_match.document] << shingle_match
+        else
+          similar_shingle_signatures.merge!({shingle_match.document => [shingle_match]})
+        end
+        prev_document_id = shingle_match.document.id
       end
     end
-
-    ranges_shingle_signatures_match << buffer_range
+    
+    similar_documents << shingle_match.document.id if shingle_match
+    ranges_shingle_signatures_match << buffer_range if buffer_range
     ranges_shingle_signatures_match.each do |range|
-      self.content_after_check << self.content[prev_range_last...range.first]
-      self.content_after_check << "<span class='highlight'>" << self.content[range] << "</span>"
+      # similar_shingle_signature = similar_shingle_signatures.shift
+      content_after_check << content[prev_range_last...range.first]
+      content_after_check << "<span class='highlight' id='#{similar_documents.shift}'>" << content[range] << "</span>"
       prev_range_last = range.last
     end
 
     if number_matched_shingle_signatures > 0
-      self.similarity =  (number_matched_shingle_signatures * 100.0 / self.shingle_signatures.size).round(2)
+      self.similarity =  (number_matched_shingle_signatures * 100.0 / shingle_signatures.size).round(2)
     else
       self.similarity = 0
     end
+    
+    # Rails.logger.debug { "message #{similar_shingle_signatures.inspect}" }
+    self.similar_documents_after_check = ""
+    range_not_include = nil
+    range_include = nil
+    similar_shingle_signatures.each_pair do |document, shingle_signatures|
+      # document = Document.find document_id
+      self.similar_documents_after_check << "<div class='hide' id='document-#{document.id}'><h3>Document id: #{document.id}</h3>"
+      
+      ranges = []
+      buffer_range = nil
+      shingle_signatures.each do |shingle_signature|
+        buffer_range ||= shingle_signature.range
+        if tmp = (buffer_range | shingle_signature.range)
+          buffer_range = tmp
+        else
+          ranges << buffer_range
+          buffer_range = shingle_signature.range
+        end
+      end
+      ranges << buffer_range
+      Rails.logger.debug { "ranges #{ranges.inspect}" }
+      prev_range_last = 0
+      ranges.each do |range|
+        self.similar_documents_after_check << document.content[prev_range_last...range.first]
+        self.similar_documents_after_check <<  "<span class='highlight'>" << document.content[range] << "</span>"
+        prev_range_last = range.last
+      end
+      self.similar_documents_after_check << document.content[prev_range_last...document.content.length]
+      self.similar_documents_after_check << "</div>"
+    end
+    
+    Rails.logger.debug { "#{self.similarity}" }
   end
 
   # def check_similarity
@@ -133,7 +187,7 @@ class Document < ActiveRecord::Base
   #   shingle_match, prev_shingle_match = nil, nil, nil
   #   number_match, position_start_shingle_match, position_end_shingle_match, position_end_shingle = 0, 0, 0, 0
   #
-  #   self.shingles.each do |shingle|
+  #   shingles.each do |shingle|
   #     Rails.logger.debug { "message #{shingle.canonized_content}" }
   #     if shingle_match = Shingle.find_by_token(shingle.token)
   #       number_match += 1
@@ -151,33 +205,33 @@ class Document < ActiveRecord::Base
   #
   #       # Если перед этим не было совпадений шинглов вставляем начало тега
   #       if !prev_shingle_match && number_not_matched_shingle < Shingle::SHNINGLE_LEGTH
-  #         self.content_after_check << "<span class='highlight' id='document-#{shingle_match.document.id}'>"
+  #         content_after_check << "<span class='highlight' id='document-#{shingle_match.document.id}'>"
   #         # number_not_matched_shingle = 0
   #       end
   #     else
   #       number_not_matched_shingle += 1
   #     end
   #     # Если текущий шингл не найден а предыдущий был найден значит надо закрыть тег
-  #     # self.content_after_check << "</span>" if (shingle_match.nil? && prev_shingle_match && number_not_matched_shingle > 3)
+  #     # content_after_check << "</span>" if (shingle_match.nil? && prev_shingle_match && number_not_matched_shingle > 3)
   #     # if number_not_matched_shingle > Shingle::SHNINGLE_LEGTH && prev_shingle_match
-  #     #   self.content_after_check << "</span>"
-  #     #   self.content_after_check << bufer
+  #     #   content_after_check << "</span>"
+  #     #   content_after_check << bufer
   #     #   bufer = ""
   #     #   number_not_matched_shingle = 0
   #     # end
   #     # # Если текущий и предыдущий шинглы найдены, но они относятся к разным документам надо закрыть тег и открыть сново
   #     # if prev_shingle_match && shingle_match && shingle_match.document.id != prev_shingle_match.document.id
-  #     #   self.content_after_check << "</span>"
-  #     #   self.content_after_check << "<span class='highlight' id='document-#{shingle_match.document.id}'>"
+  #     #   content_after_check << "</span>"
+  #     #   content_after_check << "<span class='highlight' id='document-#{shingle_match.document.id}'>"
   #     # end
   #
   #     if shingle_match
-  #       self.content_after_check << self.content[position_end_shingle...shingle.position_end]
+  #       content_after_check << content[position_end_shingle...shingle.position_end]
   #     # else
-  #     #   bufer << self.content[position_end_shingle...shingle.position_end]
+  #     #   bufer << content[position_end_shingle...shingle.position_end]
   #     end
   #     # if number_not_matched_shingle >= Shingle::SHNINGLE_LEGTH
-  #     #   self.content_after_check << bufer
+  #     #   content_after_check << bufer
   #     #   bufer = ""
   #     # end
   #     # Запоминаем найденный шингл и его позицию конца в тексте
@@ -186,40 +240,40 @@ class Document < ActiveRecord::Base
   #   end
   #
   #   # Проверка если последний шингл найден а документ закончился надо закрыть тег
-  #   self.content_after_check << "</span>" if shingle_match
+  #   content_after_check << "</span>" if shingle_match
   #
-  #   self.similarity = number_match > 0 ? (number_match * 100.0 / self.shingles.size).round(2) : 0
+  #   similarity = number_match > 0 ? (number_match * 100.0 / shingles.size).round(2) : 0
   # end
 
   def create_super_shingle_signatures
-    self.build_super_shingle_signatures
-    self.super_shingle_signatures.map(&:save)
+    build_super_shingle_signatures
+    super_shingle_signatures.map(&:save)
   end
   
   def create_mega_shingle_signatures
-    self.build_mega_shingle_signatures
-    self.mega_shingle_signatures.map(&:save)
+    build_mega_shingle_signatures
+    mega_shingle_signatures.map(&:save)
   end  
   
   def create_min_hash_signatures
-    self.build_min_hash_signatures
-    self.min_hash_signatures.map(&:save)
+    build_min_hash_signatures
+    min_hash_signatures.map(&:save)
   end
   #
-  # def create_i_match_signatures
-  #   self.build_i_match_signatures
-  #   self.i_match_signatures.map(&:save)
-  # end
+  def create_i_match_signatures
+    build_i_match_signatures
+    i_match_signatures.map(&:save)
+  end
 
   def create_shingle_signatures
-    self.build_shingle_signatures
-    self.shingle_signatures.map(&:save)
+    build_shingle_signatures
+    shingle_signatures.map(&:save)
   end
   
   private
   
   def generate_combinations_for_mega_shingle
-    array = self.super_shingle_signatures.map(&:token)
+    array = super_shingle_signatures.map(&:token)
     r = 2
     n = array.length
     indices = (0...r).to_a

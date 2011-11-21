@@ -1,0 +1,8 @@
+.block
+  .content
+    %h2.title Отчет
+    .inner
+      = raw @document.content      
+      %h3.title= "Заимствовано из документов"
+      - @documents.each do |document|
+        = link_to "Documtn id #{document.id}", admin_document_path(document.id)
