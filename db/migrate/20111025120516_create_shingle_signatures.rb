@@ -2,9 +2,7 @@
 class CreateShingleSignatures < ActiveRecord::Migration
   def change
     create_table :shingle_signatures do |t|
-      t.string :token, :unique => true
-      t.text :canonized_content
-      t.text :content
+      t.string :token
       t.integer :position_start
       t.integer :position_end
       t.integer :document_id

@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
 
-DICTIONARY = Word.where(:idf => 0..10).map(&:term).to_set
+DICTIONARY = Word.where(:idf => 0..10).map(&:term).to_set if Object.const_defined?("Word")
 
 # module Dictionary
 #   MIN_IDF = 0

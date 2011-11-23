@@ -10,7 +10,7 @@ class Document < ActiveRecord::Base
 
   after_create :create_signatures
   
-  attr_accessor :similar_documents_after_check
+  attr_accessor :similar_documents_after_check, :content_after_check, :similarity
   
   def create_signatures
     create_shingle_signatures
@@ -44,7 +44,7 @@ class Document < ActiveRecord::Base
   end
 
   def build_shingle_signatures
-    shingling = Resemblance::Shingling.new(
+    shingling = Shingling.new(
       content,
       :stop_words => Text::STOP_WORDS,
       :shingle_length => ShingleSignature::SHNINGLE_LENGTH,
@@ -134,26 +134,27 @@ class Document < ActiveRecord::Base
     
     similar_documents << shingle_match.document.id if shingle_match
     ranges_shingle_signatures_match << buffer_range if buffer_range
+    @content_after_check = ''
     ranges_shingle_signatures_match.each do |range|
       # similar_shingle_signature = similar_shingle_signatures.shift
-      content_after_check << content[prev_range_last...range.first]
-      content_after_check << "<span class='highlight' id='#{similar_documents.shift}'>" << content[range] << "</span>"
+      @content_after_check << content[prev_range_last...range.first]
+      @content_after_check << "<span class='highlight' id='#{similar_documents.shift}'>" << content[range] << "</span>"
       prev_range_last = range.last
     end
 
     if number_matched_shingle_signatures > 0
-      self.similarity =  (number_matched_shingle_signatures * 100.0 / shingle_signatures.size).round(2)
+      @similarity =  (number_matched_shingle_signatures * 100.0 / shingle_signatures.size).round(2)
     else
-      self.similarity = 0
+      @similarity = 0
     end
     
     # Rails.logger.debug { "message #{similar_shingle_signatures.inspect}" }
-    self.similar_documents_after_check = ""
+    @similar_documents_after_check = ""
     range_not_include = nil
     range_include = nil
     similar_shingle_signatures.each_pair do |document, shingle_signatures|
       # document = Document.find document_id
-      self.similar_documents_after_check << "<div class='hide' id='document-#{document.id}'><h3>Document id: #{document.id}</h3>"
+      @similar_documents_after_check << "<div class='hide' id='document-#{document.id}'><h3>Document id: #{document.id}</h3>"
       
       ranges = []
       buffer_range = nil
@@ -170,12 +171,12 @@ class Document < ActiveRecord::Base
       Rails.logger.debug { "ranges #{ranges.inspect}" }
       prev_range_last = 0
       ranges.each do |range|
-        self.similar_documents_after_check << document.content[prev_range_last...range.first]
-        self.similar_documents_after_check <<  "<span class='highlight'>" << document.content[range] << "</span>"
+        @similar_documents_after_check << document.content[prev_range_last...range.first]
+        @similar_documents_after_check <<  "<span class='highlight'>" << document.content[range] << "</span>"
         prev_range_last = range.last
       end
-      self.similar_documents_after_check << document.content[prev_range_last...document.content.length]
-      self.similar_documents_after_check << "</div>"
+      @similar_documents_after_check << document.content[prev_range_last...document.content.length]
+      @similar_documents_after_check << "</div>"
     end
     
     Rails.logger.debug { "#{self.similarity}" }

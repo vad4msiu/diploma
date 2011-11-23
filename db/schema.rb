@@ -15,8 +15,6 @@ ActiveRecord::Schema.define(:version => 20111106205124) do
 
   create_table "documents", :force => true do |t|
     t.text     "content"
-    t.text     "content_after_check", :default => ""
-    t.float    "similarity"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -48,8 +46,6 @@ ActiveRecord::Schema.define(:version => 20111106205124) do
 
   create_table "shingle_signatures", :force => true do |t|
     t.string  "token"
-    t.text    "canonized_content"
-    t.text    "content"
     t.integer "position_start"
     t.integer "position_end"
     t.integer "document_id"

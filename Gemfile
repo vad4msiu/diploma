@@ -15,7 +15,6 @@ gem 'ruby_parser'
 gem 'unicode'
 gem 'ruby-prof'
 gem 'will_paginate', '~> 3.0'
-
 # gem 'resemblance', :git => 'http://github.com/vad4msiu/resemblance.git'
 
 
