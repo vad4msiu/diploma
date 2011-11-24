@@ -2,7 +2,7 @@
 %html
   %head
     %title Web App
-    = stylesheet_link_tag 'web_app_theme'
+    = stylesheet_link_tag 'base', 'style'
     = javascript_include_tag 'application'
     = csrf_meta_tag
   %body
@@ -23,44 +23,15 @@
         %br
         %br
         #main-navigation
-          / %ul.wat-cf
-          /   %li
-          /     %span{:style => "color:white"}
-          /       Проверка с помощью:
-          / 
-          / %ul.wat-cf
-          /   %li
-          /     = link_to 'Shingle', admin_similarity_shingles_path
-          /   %li
-          /     = link_to 'MinHash', admin_similarity_min_hash_path
-          /   %li
-          /     = link_to 'SuperShingle', admin_similarity_super_shingles_path
-          /   %li
-          /     = link_to 'MegaShingle', admin_similarity_mega_shingles_path
           %ul.wat-cf
-            %li
-              %span{:style => "color:white"}
-                База знаний:
-          
-          %ul.wat-cf
-            / %li
-            /   = link_to 'Сheck the similarity (I-Match)', admin_similarity_i_match_path            
-            %li
-              = link_to 'Documents', admin_documents_path
-            %li
-              = link_to 'Shingle signatures', admin_shingle_signatures_path
-            %li
-              = link_to 'Super shingle signatures', admin_super_shingle_signatures_path
-            %li
-              = link_to 'Mega shingle signatures', admin_mega_shingle_signatures_path
-          
-            %li
-              = link_to 'MinHash signatures', admin_min_hash_signatures_path
-        
-            %li
-              = link_to 'Words', admin_words_path
-            %li
-              = link_to 'I-Match signatures', admin_i_match_signatures_path
+            %li= link_to 'Проверить', root_path
+            %li= link_to 'Documents', admin_documents_path
+            %li= link_to 'Shingle signatures', admin_shingle_signatures_path
+            %li= link_to 'Super shingle signatures', admin_super_shingle_signatures_path
+            %li= link_to 'Mega shingle signatures', admin_mega_shingle_signatures_path
+            %li= link_to 'MinHash signatures', admin_min_hash_signatures_path
+            %li= link_to 'Words', admin_words_path
+            %li= link_to 'I-Match signatures', admin_i_match_signatures_path
         
       #wrapper.wat-cf
         .flash

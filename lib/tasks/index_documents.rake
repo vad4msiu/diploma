@@ -11,7 +11,11 @@ namespace :documents do
       Find.find(ENV["DIR"]) do |file_path|
         if FileTest.file?(file_path)
           puts "Processed file #{file_path}"
-          Document.create :content => File.open(file_path).read
+          begin
+            Document.create :content => File.open(file_path).read
+          rescue Exception => e
+            puts "Error: #{e}\n#{e.backtrace.join('\n')}"
+          end                
         end
       end
     end

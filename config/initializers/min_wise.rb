@@ -90,7 +90,7 @@ module MinWise
     raise ArgumentError unless numbers.is_a?(Array)
     mins = []
     MIN_WISE_FUNCTIONS.each do |min_wise_function|
-      min = min_wise_function.call numbers.first.hex
+      min = min_wise_function.call numbers.first.hex if numbers.first
       numbers.each do |number|
         current = min_wise_function.call number.hex
         min = current if min > current

@@ -2,7 +2,7 @@
   .content
     %h2.title Отчет
     .inner
-      = raw @document.content_after_check
+      = raw @document.highlight_matched_shingle_signatures
       %h3.title= "Схожесть #{@document.similarity} %"
       - content_for :sidebar do
         = raw @document.similar_documents_after_check
