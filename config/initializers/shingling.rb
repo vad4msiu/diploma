@@ -32,7 +32,7 @@ class Shingling
             word = ""
             position_end_words << position_end
             if shingle.size == @shingle_length
-              yield(shingle.join(" "), position_start, position_end - 1)
+              yield(shingle.join(" "), position_start, position_end)
               position_start = position_end_words.shift
               shingle.shift
             end

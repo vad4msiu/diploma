@@ -1,5 +1,6 @@
 # -*- encoding : utf-8 -*-
 class Document < ActiveRecord::Base
+
   has_many :shingle_signatures, :dependent => :destroy, :order => 'id'
   has_many :i_match_signatures, :dependent => :destroy, :order => 'id'
   has_many :min_hash_signatures, :dependent => :destroy, :order => 'id'
@@ -97,42 +98,214 @@ class Document < ActiveRecord::Base
     highlight_shingle_signatures(matched_shingle_signatures)
   end
 
-  def highlight_shingle_signatures global_shingle_signatures
+  def highlight_document_mathes
     result = ''
-    range_last_tmp = 0
-    buffer_range, prev_document_id = nil
 
-    unless global_shingle_signatures.empty?
-      global_shingle_signature = global_shingle_signatures.first
-      shingle_signature = shingle_signatures.select { |s| s.token == global_shingle_signature.token }.first
-      buffer_range = shingle_signature.range
-      prev_document_id = global_shingle_signature.document.id
-    end
+    documents = ShingleSignature.where(:token => shingle_signatures.map(&:token)).group(:document_id).map(&:document)
 
-    global_shingle_signatures.each do |matched_shingle_signature|
-      shingle_signature = shingle_signatures.select { |s| s.token == matched_shingle_signature.token }.first
-      range = shingle_signature.range
-      current_document_id = matched_shingle_signature.document.id
+    documents.each do |document|
+      start_shingle_signature = nil
+      end_shingle_signature = nil
+      number_global_shingle_signatures = 0
+      prev_document_id = nil
+      buffer_range = nil
 
-      if (range_union = (buffer_range | range)) && prev_document_id == current_document_id
-        buffer_range = range_union
-        Rails.logger.debug { "union" }
-      else
-        Rails.logger.debug { "not union" }
-        result << content[range_last_tmp...buffer_range.first]
-        result << "<span class='highlight' id='#{prev_document_id}'>" << content[buffer_range] << "</span>"
-        range_last_tmp = buffer_range.last
-        buffer_range = range
+      document.shingle_signatures.each do |shingle_signature|
+        if shingle_signatures.select { |s| s.token == shingle_signature.token}.first
+          buffer_range ||= shingle_signature.range
+          start_shingle_signature ||= shingle_signature
+          number_global_shingle_signatures += 1
+
+          if (tmp = (buffer_range | shingle_signature.range))
+            buffer_range = tmp
+            end_shingle_signature = shingle_signature
+          else
+            start_shingle_signature.start = true
+            end_shingle_signature.end = true
+            buffer_range = shingle_signature.range
+            start_shingle_signature = shingle_signature
+            end_shingle_signature = nil
+          end
+        end
       end
-      prev_document_id = current_document_id
+
+      if end_shingle_signature
+        start_shingle_signature.start = true
+        end_shingle_signature.end = true
+      end
+
+
+      result << "<div  id='document-#{document.id}' class='hide'>"
+      position_start = 0
+      position_end = 0
+
+      index = 0
+      while index < document.shingle_signatures.size
+        shingle_signature = document.shingle_signatures[index]
+
+        if shingle_signature.start
+          result << document.content[position_start...shingle_signature.position_start]
+          result << "<span class='highlight' style='background-color:#{ColorForDocument.get(document.id)}'>"
+          position_start = shingle_signature.position_start
+          index += 1          
+        end
+
+        if shingle_signature.end
+          result << document.content[position_start...shingle_signature.position_end]
+          result << "</span>"
+          position_start = shingle_signature.position_end
+          index += ShingleSignature::SHNINGLE_LENGTH
+        elsif !shingle_signature.start
+          result << document.content[position_start...shingle_signature.position_start]
+          position_start = shingle_signature.position_start
+          index += 1
+        end
+      end
+
+      result << "</div>"
     end
 
     return result
   end
 
-  def matched_shingle_signatures
-    build_shingle_signatures unless flag_build_shingle_signatures
-    ShingleSignature.where(:token => shingle_signatures.map(&:token))
+  def highlight_mathes
+    result = ''
+    position_start = 0
+    position_end = 0
+
+    matches()
+    index = 0
+    while index < shingle_signatures.size
+      shingle_signature = shingle_signatures[index]
+
+      if shingle_signature.start
+        document_id = ShingleSignature.find_by_token(shingle_signature.token).document.id
+        result << "<span class='highlight' style='background-color:#{ColorForDocument.get(document_id)}' id='#{document_id}'>"
+      end
+
+      if shingle_signature.end
+        result << content[position_start...shingle_signature.position_end]
+        result << "</span>"
+        position_start = shingle_signature.position_end
+        index += ShingleSignature::SHNINGLE_LENGTH
+      else
+        result << content[position_start...shingle_signature.position_start]
+        position_start = shingle_signature.position_start
+        index += 1
+      end
+    end
+
+    return result
+  end
+
+  # def matches_highlight
+  #   result = content
+  #   offset = 0
+  #   global_ranges = []
+  #
+  #   matches.each_pair do |document, match_shingle_signatures|
+  #     global_ranges += matches_ranges(shingle_signatures) do |match_shingle_signature|
+  #       shingle_signatures.select { |s| s.token == match_shingle_signature.token }.first
+  #     end
+  #   end
+  #
+  #   global_ranges.sort! { |a, b| a.first <=> b.first}
+  #
+  #   Rails.logger.debug { "message #{global_ranges.inspect}" }
+  #   global_ranges.each do |range|
+  #     result.insert(offset + range.first, "<span class='highlight' style='background-color:#{}' id='#{}'>")
+  #     result.insert(offset + range.last, "</span>")
+  #     offset += "<span class='highlight' style='background-color:#{}' id='#{}'>".length + 7
+  #   end
+  #
+  #   return result
+  # end
+  #
+  # def matches_ranges match_shingle_signatures, &block
+  #   ranges = []
+  #
+  #   buffer_range = match_shingle_signatures.first.range unless match_shingle_signatures.empty?
+  #
+  #   match_shingle_signatures.each do |match_shingle_signature|
+  #     match_shingle_signature = yield(match_shingle_signature) if block
+  #     # Rails.logger.debug { "#{match_shingle_signature.inspect}" }
+  #     range = match_shingle_signature.range
+  #     if (range_union = (buffer_range | range))
+  #       buffer_range = range_union
+  #     else
+  #       ranges << buffer_range
+  #       buffer_range = range
+  #     end
+  #   end
+  #
+  #   Rails.logger.debug { "message #{ranges.include?(buffer_range)}" }
+  #   ranges << buffer_range unless ranges.include?(buffer_range)
+  #   return ranges
+  # end
+
+  # Возваращет хеш. Ключ является документ,
+  # а значением массив шинглов
+  # def matches
+  #   result = {}
+  #   index = 0
+  #   build_shingle_signatures unless flag_build_shingle_signatures
+  #
+  #   while index < shingle_signatures.size
+  #     if tmp = ShingleSignature.find_by_token(shingle_signatures[index].token)
+  #       if result.has_key?(tmp.document)
+  #         result[tmp.document] << tmp
+  #       else
+  #         result.merge! tmp.document => [tmp]
+  #       end
+  #       index += ShingleSignature::SHNINGLE_LENGTH
+  #     else
+  #       index += 1
+  #     end
+  #   end
+  #
+  #   return result
+  # end
+
+  def matches
+    start_shingle_signature = nil
+    end_shingle_signature = nil
+    number_global_shingle_signatures = 0
+    prev_document_id = nil
+    buffer_range = nil
+
+    shingle_signatures.each do |shingle_signature|
+      if shingle_match = ShingleSignature.find_by_token(shingle_signature.token.to_s)
+        Rails.logger.debug { "#{shingle_match.cut_content}" }
+        buffer_range ||= shingle_signature.range
+        prev_document_id ||= shingle_match.document.id
+        start_shingle_signature ||= shingle_signature
+        number_global_shingle_signatures += 1
+
+        if (tmp = (buffer_range | shingle_signature.range)) && prev_document_id == shingle_match.document.id
+          buffer_range = tmp
+          end_shingle_signature = shingle_signature
+        else
+          start_shingle_signature.start = true
+          end_shingle_signature.end = true
+          buffer_range = shingle_signature.range
+          start_shingle_signature = shingle_signature
+          end_shingle_signature = nil
+        end
+
+        prev_document_id = shingle_match.document.id
+      end
+    end
+
+    if end_shingle_signature
+      start_shingle_signature.start = true
+      end_shingle_signature.end = true
+    end
+
+    if number_global_shingle_signatures > 0
+      @similarity =  (number_global_shingle_signatures * 100.0 / shingle_signatures.size).round(2)
+    else
+      @similarity = 0
+    end
   end
 
   # Кромешный АД
