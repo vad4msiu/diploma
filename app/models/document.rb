@@ -121,7 +121,7 @@ class Document < ActiveRecord::Base
             end_shingle_signature = shingle_signature
           else
             start_shingle_signature.start = true
-            end_shingle_signature = shingle_signature unless end_shingle_signature
+            end_shingle_signature = start_shingle_signature unless end_shingle_signature
             end_shingle_signature.end = true
             buffer_range = shingle_signature.range
             start_shingle_signature = shingle_signature
@@ -135,6 +135,7 @@ class Document < ActiveRecord::Base
         end_shingle_signature.end = true
       end
 
+      Rails.logger.debug { "+++++#{document.shingle_signatures.map {|s| "#{"start" if s.start} #{"end" if s.end}"}}\n" }
 
       result << "<div  id='document-#{document.id}' class='hide'>"
       position_start = 0
@@ -145,22 +146,26 @@ class Document < ActiveRecord::Base
         shingle_signature = document.shingle_signatures[index]
 
         if shingle_signature.start
-          result << document.content[position_start...shingle_signature.position_start]
+          # result << document.content[position_start...shingle_signature.position_start]
           result << "<span class='highlight' style='background-color:#{ColorForDocument.get(document.id)}'>"
-          position_start = shingle_signature.position_start
-          index += 1          
+          # position_start = shingle_signature.position_start
+          # index += 1
         end
 
-        if shingle_signature.end
-          result << document.content[position_start...shingle_signature.position_end]
-          result << "</span>"
-          position_start = shingle_signature.position_end
-          index += ShingleSignature::SHNINGLE_LENGTH
-        elsif !shingle_signature.start
+        # if shingle_signature.end
+        #   result << document.content[position_start...shingle_signature.position_end]
+        #   result << "</span>"
+        #   position_start = shingle_signature.position_end
+        #   index += ShingleSignature::SHNINGLE_LENGTH
+        # elsif !shingle_signature.start
           result << document.content[position_start...shingle_signature.position_start]
           position_start = shingle_signature.position_start
           index += 1
-        end
+          
+          if shingle_signature.end
+            result << "</span>"
+          end
+        # end
       end
 
       result << "</div>"
@@ -173,6 +178,8 @@ class Document < ActiveRecord::Base
     result = ''
     position_start = 0
     position_end = 0
+    flag_1 = false
+    flag_2 = false
 
     matches()
     index = 0
@@ -180,20 +187,33 @@ class Document < ActiveRecord::Base
       shingle_signature = shingle_signatures[index]
 
       if shingle_signature.start
+        # if flag_1
+        #   result << "</span>"
+        #   flag_2 = true
+        # end
         document_id = ShingleSignature.find_by_token(shingle_signature.token).document.id
         result << "<span class='highlight' style='background-color:#{ColorForDocument.get(document_id)}' id='#{document_id}'>"
+        flag_1 = true
       end
 
+      # if shingle_signature.end
+      #   result << content[position_start...shingle_signature.position_start]
+      #   result << "</span>"
+      #   position_start = shingle_signature.position_end
+      #   index += ShingleSignature::SHNINGLE_LENGTH
+      # else
+      result << content[position_start...shingle_signature.position_start]
+      position_start = shingle_signature.position_start
+      index += 1
+
       if shingle_signature.end
-        result << content[position_start...shingle_signature.position_end]
-        result << "</span>"
-        position_start = shingle_signature.position_end
-        index += ShingleSignature::SHNINGLE_LENGTH
-      else
-        result << content[position_start...shingle_signature.position_start]
-        position_start = shingle_signature.position_start
-        index += 1
+        # unless flag_2
+          result << "</span>"
+        # end
+        # flag_2 = false
       end
+
+      # end
     end
 
     return result
@@ -287,7 +307,7 @@ class Document < ActiveRecord::Base
           end_shingle_signature = shingle_signature
         else
           start_shingle_signature.start = true
-          end_shingle_signature = shingle_signature unless end_shingle_signature
+          end_shingle_signature = start_shingle_signature unless end_shingle_signature
           end_shingle_signature.end = true
           buffer_range = shingle_signature.range
           start_shingle_signature = shingle_signature
@@ -298,6 +318,8 @@ class Document < ActiveRecord::Base
       end
     end
 
+
+    Rails.logger.debug { "+++++#{shingle_signatures.map {|s| "#{"start" if s.start} #{"end" if s.end}"}}\n" }
     if end_shingle_signature
       start_shingle_signature.start = true
       end_shingle_signature.end = true
