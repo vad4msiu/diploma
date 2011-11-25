@@ -8,6 +8,10 @@ class Admin::MainController < ApplicationController
   end
 
   def check_similarity
+    if params[:file]
+      params[:content] = params[:file].read.force_encoding("UTF-8")
+    end
+    
     @document = Document.new :content => params[:content]
     case params[:type]
     when 'shingle'

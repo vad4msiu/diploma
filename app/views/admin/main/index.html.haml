@@ -2,15 +2,19 @@
   .content
     %h2.title Проверка текста на заимствование
     .inner
-      = form_tag admin_check_similarity_path, :class => 'form' do
+      = form_tag admin_check_similarity_path, :class => 'form', :multipart => true do
         .group
           = label :type, "с помощью:", :class => 'label'
         .group
           = select_tag :type, options_for_select(%w(shingle super-shingle mega-shingle min-hash i-match).map {|i| [i, i]})
-      
+        .group
+          = label :type, "Из файла:", :class => 'label'        
+        .group
+          = file_field_tag :file
+        .group
+          = label :type, "или", :class => 'label'      
         .group
           = text_area_tag :content, params[:content], :class => 'text_area', :rows => 20
-          
         .group.navform.wat-cf
           %button.button{:type => "submit"}
             = image_tag("/web-app-theme/icons/tick.png")
