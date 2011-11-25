@@ -121,6 +121,7 @@ class Document < ActiveRecord::Base
             end_shingle_signature = shingle_signature
           else
             start_shingle_signature.start = true
+            end_shingle_signature = shingle_signature unless end_shingle_signature
             end_shingle_signature.end = true
             buffer_range = shingle_signature.range
             start_shingle_signature = shingle_signature
@@ -286,6 +287,7 @@ class Document < ActiveRecord::Base
           end_shingle_signature = shingle_signature
         else
           start_shingle_signature.start = true
+          end_shingle_signature = shingle_signature unless end_shingle_signature
           end_shingle_signature.end = true
           buffer_range = shingle_signature.range
           start_shingle_signature = shingle_signature
