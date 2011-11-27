@@ -1,3 +1,5 @@
+# encoding: UTF-8
+
 class Shingling
   def initialize(content = '', options = {})
     @content = content
@@ -23,7 +25,7 @@ class Shingling
 
     @content.each_char do |char|
       char = @replace_chars[char] if @replace_chars.key? char
-      if char !~ /[[:word:]]+/
+      if char !~ /[А-ЯЁа-яё]/
         char_flag = true
       else
         if char_flag

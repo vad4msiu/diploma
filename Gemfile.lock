@@ -75,6 +75,7 @@ GEM
       treetop (~> 1.4.8)
     mime-types (1.17.2)
     multi_json (1.0.3)
+    mysql2 (0.3.10)
     net-scp (1.0.4)
       net-ssh (>= 1.99.1)
     net-sftp (2.0.5)
@@ -165,6 +166,7 @@ DEPENDENCIES
   haml
   hpricot
   inherited_resources
+  mysql2
   pg
   rails (= 3.1.1)
   rspec-rails

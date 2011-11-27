@@ -26,7 +26,7 @@
 body {
   color: #111111;
   background: #c4c4c4 url("images/bgd.jpg");
-  font-family: "MuseoSans500", helvetica, arial, sans-serif;
+  font-family: helvetica, arial, sans-serif;
 }
 
 h1, h2, h3 {
@@ -77,7 +77,7 @@ hr {
 #main .block {
   padding-top: 0px;
   background-color: white;
-  text-shadow: 0 1px 0 white;
+/*  text-shadow: 0 1px 0 white;*/
   -moz-border-radius: 6px;
   -webkit-border-radius: 6px;
   border-radius: 6px;
@@ -465,16 +465,11 @@ a.button:active, button.button:active {
 .hide {
 	display:none;
 }
-
-.highlight{
-	background-color: #FFDEAD;	
+.shingle-signature {
+/*	line-height:18px;*/
 }
 
-
-.inner .highlight{
-	text-decoration:underline;
-}
-
-span.highlight:hover{
+.shingle-signature:hover {
 	cursor:pointer;
+	background-color: #FFDEAD;
 }

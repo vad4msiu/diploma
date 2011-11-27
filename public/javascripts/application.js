@@ -1,19 +1,46 @@
-// This is a manifest file that'll be compiled into including all the files listed below.
-// Add new JavaScript/Coffee code in separate files in this directory and they'll automatically
-// be included in the compiled file accessible from http://example.com/assets/application.js
-// It's not advisable to add code directly here, but if you do, it'll appear at the bottom of the
-// the compiled file.
-//
-//= require jquery
-//= require jquery_ujs
-//= require_tree .
 $(document).ready(function() {
-    $('span.highlight').live("click",
+    var documentShow = null;
+    var backgroundOld = null;
+    var tokenOld = null;
+
+    // function goToByScroll(token) {
+    //     $('html,body').animate({
+    //         scrollTop: $(".document [data-shingle-signature-token=" + token + "]").offset().top
+    //     },
+    //     'slow');
+    // };
+
+    $('.shingle-signature').live("click",
     function() {
-        $('#sidebar').children().each(
+        var tmp = $('#document-' + $(this).attr("data-document-id"));
+        var token = $(this).attr("data-shingle-signature-token");
+
+        if (tokenOld != null) {
+            $("[data-shingle-signature-token=" + tokenOld + "]").each(
+		        function() {
+		            $(this).css("background-color", backgroundOld);
+		        });
+        };
+				
+				backgroundOld = $(this).css('background-color');
+				tokenOld = token;
+
+        $("[data-shingle-signature-token=" + token + "]").each(
         function() {
-            $(this).hide();
+            $(this).css("background-color", "#FFDEAD");
         });
-        $('#document-' + $(this).attr("id")).show('fast');
+
+        if (documentShow != null) {
+            if (tmp.attr("id") != documentShow.attr("id")) {
+                documentShow.hide();
+                documentShow = tmp;
+                documentShow.show("fast");
+            };
+        } else {
+            documentShow = tmp;
+            documentShow.show("slow");
+        };
+
+        // goToByScroll(token);
     });
 });

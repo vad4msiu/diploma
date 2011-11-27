@@ -1,5 +1,5 @@
 class ColorForDocument
-  @@background_colors = ["#FFE4C4", "#00BFFF", "#66CDAA", "#FFFF00", "#CD5C5C", "#EE82EE", "#EEE9BF"]
+  @@background_colors = ['#8181F7', '#81BEF7', '#81F7F3', '#81F7BE', '#81F781', '#BEF781', '#F3F781', '#F7BE81', '#F78181', '#F781BE', '#F781F3', '#BE81F7']
   @@global_colors = {}
   
   def self.get id

@@ -1,10 +1,12 @@
+# encoding: UTF-8
+
 namespace :documents do
   desc "Create I-Match dictionary"
   task :"re-i-match" => :environment do
     global_words = {}
     Document.all.each do |document|
       document.i_match_signatures.destroy_all
-      current_words = document.content.split(/[^[:word:]]+/).to_set
+      current_words = document.content.split(/[^А-ЯЁа-яё]+/).to_set
       current_words.each do |word|
         if global_words.has_key?(word)
           global_words[word] += 1

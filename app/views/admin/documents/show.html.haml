@@ -13,7 +13,7 @@
         = @document.content
         %br
         - @document.shingle_signatures.each do  |shingle_signature|
-          = shingle_signature.range.to_s + " - " + shingle_signature.cut_content
+          = shingle_signature.range.to_s + " - " + shingle_signature.cut_content + " (#{shingle_signature.token})"
           %br
       .wat-cf
         = link_to image_tag("web-app-theme/icons/application_edit.png", :alt => "#{t("web-app-theme.edit", :default=> "Edit")}") + " " + t("web-app-theme.edit", :default=> "Edit"), edit_admin_document_path(@document), :class => "button"

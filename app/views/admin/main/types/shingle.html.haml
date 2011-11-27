@@ -2,7 +2,7 @@
   .content
     %h2.title Отчет
     .inner
-      = raw @document.highlight_mathes
+      = match_highlight @document
       %h3.title= "Схожесть #{@document.similarity} %"
       - content_for :sidebar do
-        = raw @document.highlight_document_mathes
+        = match_highlight_documents @document.match_documents

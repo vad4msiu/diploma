@@ -6,8 +6,9 @@ class ShingleSignature < ActiveRecord::Base
   validates :token, :presence => true, :uniqueness => true
   validates :position_start, :presence => true, :numericality => true
   validates :position_end, :presence => true, :numericality => true
+  validates :document_id, :presence => true
   
-  attr_accessor :start, :end
+  attr_accessor :start, :end, :marked
   
   def range
     self.position_start...self.position_end

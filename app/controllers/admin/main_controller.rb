@@ -16,7 +16,7 @@ class Admin::MainController < ApplicationController
     case params[:type]
     when 'shingle'
       @document.build_shingle_signatures
-      @document.similarity_shingle_signatures
+      @document.match
       render 'admin/main/types/shingle'
     when 'super-shingle'
       @document.build_shingle_signatures
