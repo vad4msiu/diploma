@@ -1,7 +1,6 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.1.1'
-gem 'mysql2'
 gem 'inherited_resources'
 gem 'devise'
 gem 'web-app-theme', '~> 0.8.0'
