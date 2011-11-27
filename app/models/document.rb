@@ -69,20 +69,20 @@ class Document < ActiveRecord::Base
   end
 
   def similarity_super_shingle_signatures
-    Document.joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+    Document.select("DISTINCT ON (id) *").joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_i_match_signatures
-    Document.joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+    Document.select("DISTINCT ON (id) *").joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_mega_shingle_signatures
-    Document.joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+    Document.select("DISTINCT ON (id) *").joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_min_hash_signatures
     equal_count = 0.0
-    documents = Document.joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s)).group(:"documents.id")
+    documents = Document.select("DISTINCT ON (id) *").joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
 
     documents.each do |document|
       MinWise::FUNCTION_NUMBER.times do |i|
@@ -96,7 +96,7 @@ class Document < ActiveRecord::Base
   end
 
   def match_documents
-    ShingleSignature.where(:token => shingle_signatures.map(&:token)).group(:document_id).map(&:document).each do |document|
+    ShingleSignature.select("DISTINCT ON (document_id) *").where(:token => shingle_signatures.map(&:token)).map(&:document).each do |document|
       document.match do |shingle_signature|
         tmp = shingle_signatures.select { |s| s.token == shingle_signature.token}.first
         tmp ? shingle_signature : nil
@@ -157,13 +157,15 @@ class Document < ActiveRecord::Base
     raw = conn.raw_connection
     raw.exec("COPY shingle_signatures (token, position_start, position_end, document_id) FROM STDIN DELIMITERS ','")
     shingle_signatures.each do |shingle_signature|
-      if !tmp.has_key?(shingle_signature.token) && ShingleSignature.find_by_token(shingle_signature.token)
+      if !tmp.has_key?(shingle_signature.token) && ShingleSignature.find_by_token(shingle_signature.token).nil?
         raw.put_copy_data "#{shingle_signature.token}, #{shingle_signature.position_start}, #{shingle_signature.position_end}, #{shingle_signature.document_id}\n"
         tmp.merge! shingle_signature.token => true
       end
     end
     raw.put_copy_end
-    while res = raw.get_result do; end
+    while res = raw.get_result 
+      # Говорят что важно
+    end
     ActiveRecord::Base.connection_pool.checkin(conn)
   end
 
