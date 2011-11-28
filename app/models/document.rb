@@ -69,20 +69,20 @@ class Document < ActiveRecord::Base
   end
 
   def similarity_super_shingle_signatures
-    Document.select("DISTINCT ON (id) *").joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    Document.select("DISTINCT ON (documents.id) *").joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_i_match_signatures
-    Document.select("DISTINCT ON (id) *").joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    Document.select("DISTINCT ON (documents.id) *").joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_mega_shingle_signatures
-    Document.select("DISTINCT ON (id) *").joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    Document.select("DISTINCT ON (documents.id) *").joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_min_hash_signatures
     equal_count = 0.0
-    documents = Document.select("DISTINCT ON (id) *").joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    documents = Document.select("DISTINCT ON (documents.id) *").joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
 
     documents.each do |document|
       MinWise::FUNCTION_NUMBER.times do |i|
