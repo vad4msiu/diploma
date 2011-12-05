@@ -105,6 +105,7 @@ class Document < ActiveRecord::Base
   end
 
   def match &block
+    t1 = Time.now
     start_shingle_signature = nil
     end_shingle_signature = nil
     number_global_shingle_signatures = 0
@@ -125,6 +126,9 @@ class Document < ActiveRecord::Base
     else
       @similarity = 0
     end
+    t2 = Time.now
+    
+    Rails.logger.debug { "Time match: #{t2-t1}" }
   end
 
   def create_super_shingle_signatures
@@ -167,6 +171,23 @@ class Document < ActiveRecord::Base
       # Говорят что важно
     end
     ActiveRecord::Base.connection_pool.checkin(conn)
+  end
+  
+  def search_from_google
+    s = shingle_signatures[rand(shingle_signatures.count)]
+    t1 = Time.now
+    documents = ScrapingGoogle.search(:query => content[s.position_start..s.position_end])
+    t2 = Time.now
+    Rails.logger.debug { "documents.size #{documents.size}" }
+    documents.each_pair do |link, content|
+      t4 = Time.now
+      Document.create(:content => content, :source => link)
+      t5 = Time.now
+      Rails.logger.debug { "Time in create document: #{t5-t4}" }
+    end
+    t3 = Time.now
+    
+    Rails.logger.debug { "Time search_from_google: #{t2-t1}, #{t3-t2}" }
   end
 
   private

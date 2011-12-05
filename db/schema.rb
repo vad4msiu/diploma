@@ -11,12 +11,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111106205124) do
+ActiveRecord::Schema.define(:version => 20111205213942) do
 
   create_table "documents", :force => true do |t|
     t.text     "content"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "source"
   end
 
   create_table "i_match_signatures", :force => true do |t|

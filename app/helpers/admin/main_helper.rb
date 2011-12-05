@@ -43,8 +43,10 @@ module Admin::MainHelper
     result = ''
 
     match_documents.each do |document|
-      result << content_tag(:div, :id => "document-#{document.id}", :class => 'document hide') do
-        match_highlight(document)
+      result << content_tag(:div, :id => "document-#{document.id}", :class => 'document hide') do        
+        content_tag(:h3) do
+          "Document id: #{document.id} #{document.source}"
+        end << match_highlight(document)        
       end
     end
 

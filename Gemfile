@@ -12,6 +12,7 @@ gem 'unicode'
 gem 'ruby-prof'
 gem 'will_paginate', '~> 3.0'
 gem 'therubyracer'
+gem 'nokogiri'
 
 group :development, :test do
   gem 'sqlite3'
