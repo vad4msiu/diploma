@@ -64,7 +64,7 @@ class Document < ActiveRecord::Base
   end
 
   def build_i_match_signatures
-    current_words = content.split(/[^[:word:]]+/).to_set
+    current_words = content.split(/[^А-ЯЁа-яё]+/).to_set
     i_match_signatures.new(:token => Digest::MD5.hexdigest((current_words & Word.where(:idf => 2..4).map(&:term).to_set).to_a.sort.join))
   end
 

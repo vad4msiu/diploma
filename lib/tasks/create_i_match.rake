@@ -1,7 +1,7 @@
 # encoding: UTF-8
 
 namespace :documents do
-  desc "Create I-Match dictionary"
+  desc "Составление словря для I-Match и перевычесление сигнатру."
   task :"re-i-match" => :environment do
     global_words = {}
     Document.all.each do |document|

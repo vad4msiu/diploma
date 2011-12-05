@@ -1,11 +1,11 @@
 require 'find'
 require 'digest/md5'
-# require 'ruby-prof'
+require 'ruby-prof'
 
 namespace :documents do
   desc "Import documents and create shingles from DIR"
   task :import => :environment do
-    # RubyProf.start
+    RubyProf.start
     SHINGLE_LENGTH = ENV["SHINGLE_LENGTH"] || 9
     if ENV["DIR"]
       Find.find(ENV["DIR"]) do |file_path|
@@ -20,10 +20,19 @@ namespace :documents do
       end
     end
 
-    # results = RubyProf.stop
-    #
-    # File.open "tmp/profile-graph.html", 'w' do |file|
-    #  RubyProf::GraphHtmlPrinter.new(results).print(file)
-    # end
+    results = RubyProf.stop
+    
+    File.open "tmp/profile-flat.txt", 'w' do |file|
+     RubyProf::FlatPrinter.new(results).print(file)
+    end
+    
+    
+    File.open "tmp/profile-graph.html", 'w' do |file|
+     RubyProf::GraphHtmlPrinter.new(results).print(file)
+    end
+
+    File.open "tmp/profile.dot", 'w' do |file|
+     RubyProf::DotPrinter.new(results).print(file)
+    end
   end
 end
