@@ -176,22 +176,23 @@ class Document < ActiveRecord::Base
   end
   
   def search_from_google
-    s = shingle_signatures[rand(shingle_signatures.count)]
+    index = rand(shingle_signatures.count - 3)
+    position_start = shingle_signatures[index].position_start
+    position_end = shingle_signatures[index + 3].position_end
     t1 = Time.now
-    documents = ScrapingGoogle.search(:query => content[s.position_start..s.position_end])
+    documents = ScrapingGoogle.search(:query => content[position_start..position_end])
     t2 = Time.now
     Rails.logger.debug { "documents.size #{documents.size}" }
     documents.each_pair do |link, content|
       t4 = Time.now
-      Rails.logger.debug { "documents #{content}" }
-      Rails.logger.debug { "link #{link}" }
-      Document.create(:content => content, :source => link)
+      Document.create(:content => content, :source => link) unless Document.find_by_source(link)
       t5 = Time.now
       Rails.logger.debug { "Time in create document: #{t5-t4}" }
     end
     t3 = Time.now
     
     Rails.logger.debug { "Time search_from_google: #{t2-t1}, #{t3-t2}" }
+    Rails.logger.debug { "query #{content[position_start..position_end]}" }
   end
 
   private

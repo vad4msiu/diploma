@@ -8,6 +8,7 @@ module ScrapingGoogle
     raise ArgumentError, "Query is not a Hash" unless options.is_a? Hash
     query = options[:query]
     raise ArgumentError, "Is not empty query" unless query
+    Rails.logger.debug { "query: #{query}" }
     documents = {}
     issuance = Nokogiri::HTML(open("http://www.google.com/search?q=#{CGI::escape(query)}").read)
     issuance.css('h3.r a').each do |link|
