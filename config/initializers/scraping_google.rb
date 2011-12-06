@@ -13,9 +13,12 @@ module ScrapingGoogle
     issuance.css('h3.r a').each do |link|
       begin
         href = link.attributes["href"].content
-        doc = Nokogiri::HTML(open(href).read)
-        doc.css('script').remove
-        documents.merge! href => doc.content
+        html = open(href)
+        if html.content_type == "text/html"
+          doc = Nokogiri::HTML(html.read)
+          doc.css('script').remove
+          documents.merge! href => doc.content
+        end
       rescue Exception => e
         Rails.logger.debug { "#{e}" }
         next
