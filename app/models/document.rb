@@ -176,9 +176,15 @@ class Document < ActiveRecord::Base
   end
   
   def search_from_google
-    index = rand(shingle_signatures.count - 3)
-    position_start = shingle_signatures[index].position_start
-    position_end = shingle_signatures[index + 3].position_end
+    if shingle_signatures.count - 10 < 0
+      index = rand(shingle_signatures.count - 10)
+      position_start = shingle_signatures[index].position_start
+      position_end = shingle_signatures[index + 10].position_end
+    else
+      position_start = shingle_signatures.first.position_start
+      position_end = shingle_signatures.last.position_end      
+    end
+    Rails.logger.debug { "query #{content[position_start..position_end]}" }
     t1 = Time.now
     documents = ScrapingGoogle.search(:query => content[position_start..position_end])
     t2 = Time.now
