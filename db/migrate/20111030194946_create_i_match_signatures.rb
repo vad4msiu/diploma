@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class CreateIMatchSignatures < ActiveRecord::Migration
   def change
     create_table :i_match_signatures do |t|

@@ -2,7 +2,9 @@
   .content
     %h2.title Отчет
     .inner
-      = match_highlight @document
+      - benchmark("Showing document content") do
+        = match_highlight @document
       %h3.title= "Схожесть #{@document.similarity} %"
       - content_for :sidebar do
-        = match_highlight_documents @document.match_documents
+        - benchmark("Showing sidebar document content") do
+          = match_highlight_documents @document.match_documents

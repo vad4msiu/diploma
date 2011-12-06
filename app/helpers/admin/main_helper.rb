@@ -45,7 +45,7 @@ module Admin::MainHelper
     match_documents.each do |document|
       result << content_tag(:div, :id => "document-#{document.id}", :class => 'document hide') do        
         content_tag(:h3) do
-          "Document id: #{document.id} #{document.source}"
+          "Document id: #{document.id}, #{"Source:" unless document.source.blank?} #{document.source}"
         end << match_highlight(document)        
       end
     end

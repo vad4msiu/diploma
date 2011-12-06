@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 require 'nokogiri'
 require 'open-uri'
 require "cgi"
@@ -8,19 +9,17 @@ module ScrapingGoogle
     query = options[:query]
     raise ArgumentError, "Is not empty query" unless query
     documents = {}
-    doc = Nokogiri::HTML(open("http://www.google.com/search?q=#{CGI::escape(query)}"))
-    first = false
-    doc.css('h3.r a').each do |link|
-      unless first
-        begin
-          href = link.attributes["href"].content
-          documents.merge! href => Nokogiri::HTML(open(href)).content
-        rescue Exception => e
-          Rails.logger.debug { "#{e}" }
-          next
-        end
+    issuance = Nokogiri::HTML(open("http://www.google.com/search?q=#{CGI::escape(query)}").read)
+    issuance.css('h3.r a').each do |link|
+      begin
+        href = link.attributes["href"].content
+        doc = Nokogiri::HTML(open(href).read)
+        doc.css('script').remove
+        documents.merge! href => doc.content
+      rescue Exception => e
+        Rails.logger.debug { "#{e}" }
+        next
       end
-      first = true
     end
 
     return documents

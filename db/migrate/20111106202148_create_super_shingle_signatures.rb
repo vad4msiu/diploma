@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class CreateSuperShingleSignatures < ActiveRecord::Migration
   def change
     create_table :super_shingle_signatures do |t|

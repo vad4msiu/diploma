@@ -1,4 +1,4 @@
-# encoding: UTF-8
+# -*- encoding : utf-8 -*-
 
 class Shingling
   def initialize(content = '', options = {})
@@ -22,7 +22,7 @@ class Shingling
     shingle = []
     position_end_words = []
     position_start, position_end = 0, 0
-
+    
     @content.each_char do |char|
       char = @replace_chars[char] if @replace_chars.key? char
       if char !~ /[А-ЯЁа-яё]/

@@ -7,10 +7,14 @@
   .content
     .inner
       %p
+        %b Source
+        = @document.source
+        %br
         %b
           = t("activerecord.attributes.admin_document.content", :default => t("activerecord.labels.content", :default => "Content"))
           \:
         = @document.content
+        
         %br
         - @document.shingle_signatures.each do  |shingle_signature|
           = shingle_signature.range.to_s + " - " + shingle_signature.cut_content + " (#{shingle_signature.token})"

@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class Matrix
   def multiplication_mod_2(m)
     case(m)

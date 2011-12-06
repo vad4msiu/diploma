@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class Admin::SuperShingleSignaturesController < Admin::MainController
   inherit_resources
   

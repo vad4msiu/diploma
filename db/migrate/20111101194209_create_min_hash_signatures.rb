@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class CreateMinHashSignatures < ActiveRecord::Migration
   def change
     create_table :min_hash_signatures do |t|

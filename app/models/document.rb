@@ -16,6 +16,8 @@ class Document < ActiveRecord::Base
   attr_accessor :similar_documents_after_check, :content_after_check, :similarity, :flag_build_shingle_signatures
 
   def create_signatures
+    Rails.logger.debug { "source:#{source}" }
+    Rails.logger.debug { "content:#{content}" }
     create_shingle_signatures
     create_min_hash_signatures
     create_super_shingle_signatures
