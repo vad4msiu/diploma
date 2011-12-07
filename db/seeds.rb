@@ -7,4 +7,10 @@
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
 
-User.create(email: "vad4msiu@gmail.com", password: "qweqwe") if User.all.empty?
+if User.count == 0
+  u = User.new(email: "vad4msiu@gmail.com")
+  u.role = :admin
+  u.password = "qweqwe"
+  u.save!
+end
+

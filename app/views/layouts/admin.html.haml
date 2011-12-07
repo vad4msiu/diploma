@@ -10,14 +10,9 @@
       #header
         %h1
           %a{:href => "/"} Проверка на заимствование
-        / #user-navigation
-        /   %ul.wat-cf
-        /     %li
-        /       %a{:href => "#"}= t("web-app-theme.profile", :default => "Profile")
-        /     %li
-        /       %a{:href => "#"}= t("web-app-theme.settings", :default => "Settings")
-        /     %li
-        /       %a.logout{:href => "/logout"}= t("web-app-theme.logout", :default => "Logout")
+        #user-navigation
+          %ul.wat-cf
+            %li= link_to 'Выйти', destroy_user_session_path, :class => "logout"
         %br
         %br
         %br
@@ -25,13 +20,15 @@
         #main-navigation
           %ul.wat-cf
             %li= link_to 'Проверить документ', root_path
-            %li= link_to 'Documents', admin_documents_path
-            %li= link_to 'Shingle signatures', admin_shingle_signatures_path
-            %li= link_to 'Super shingle signatures', admin_super_shingle_signatures_path
-            %li= link_to 'Mega shingle signatures', admin_mega_shingle_signatures_path
-            %li= link_to 'MinHash signatures', admin_min_hash_signatures_path
-            %li= link_to 'Words', admin_words_path
-            %li= link_to 'I-Match signatures', admin_i_match_signatures_path
+            - if current_user.role? :admin
+              %li= link_to 'Documents', admin_documents_path
+              %li= link_to 'Shingle signatures', admin_shingle_signatures_path
+              %li= link_to 'Super shingle signatures', admin_super_shingle_signatures_path
+              %li= link_to 'Mega shingle signatures', admin_mega_shingle_signatures_path
+              %li= link_to 'MinHash signatures', admin_min_hash_signatures_path
+              %li= link_to 'Words', admin_words_path
+              %li= link_to 'I-Match signatures', admin_i_match_signatures_path
+              %li= link_to 'Пользователи', admin_users_path
         
       #wrapper.wat-cf
         .flash

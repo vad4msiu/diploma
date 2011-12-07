@@ -191,6 +191,7 @@ class Document < ActiveRecord::Base
     Rails.logger.debug { "documents.size #{documents.size}" }
     documents.each_pair do |link, content|
       t4 = Time.now
+      Rails.logger.debug { "link: #{link}" }
       Document.create(:content => content, :source => link) unless Document.find_by_source(link)
       t5 = Time.now
       Rails.logger.debug { "Time in create document: #{t5-t4}" }

@@ -1,7 +1,7 @@
 # -*- encoding : utf-8 -*-
 Diploma::Application.routes.draw do
   
-  devise_for :users, :skip => :registrations
+  devise_for :users#, :skip => :registrations
 
   root :to => "admin/main#index"
 
@@ -31,6 +31,7 @@ Diploma::Application.routes.draw do
     resources :mega_shingle_signatures
     resources :min_hash_signatures
     resources :words
+    resources :users
   end
   
   # The priority is based upon order of creation:

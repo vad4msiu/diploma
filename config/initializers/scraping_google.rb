@@ -9,6 +9,7 @@ module ScrapingGoogle
     query = options[:query]
     raise ArgumentError, "Is not empty query" unless query
     Rails.logger.debug { "query: #{query}" }
+    ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
     documents = {}
     issuance = Nokogiri::HTML(open("http://www.google.com/search?q=#{CGI::escape(query)}").read)
     issuance.css('h3.r a').each do |link|
@@ -18,7 +19,8 @@ module ScrapingGoogle
         if html.content_type == "text/html"
           doc = Nokogiri::HTML(html.read)
           doc.css('script').remove
-          documents.merge! href => doc.content
+          content = ic.iconv(doc.content)
+          documents.merge! href => content
         end
       rescue Exception => e
         Rails.logger.debug { "#{e}" }

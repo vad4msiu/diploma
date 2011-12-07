@@ -13,6 +13,7 @@ gem 'ruby-prof'
 gem 'will_paginate', '~> 3.0'
 gem 'therubyracer'
 gem 'nokogiri'
+gem 'cancan'
 
 group :development, :test do
   gem 'sqlite3'
