@@ -2,18 +2,6 @@
 class Admin::UsersController < Admin::MainController
   inherit_resources
   
-  def create
-    @user = User.new params[:user]
-    
-    if params[:role] == "admin"
-      @user.role = :admin
-    else 
-      @user.role = :teacher
-    end
-    
-    super
-  end
-  
   protected
 
   def collection

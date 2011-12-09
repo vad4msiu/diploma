@@ -3,7 +3,7 @@ require 'csv'
 
 class Document < ActiveRecord::Base
 
-  has_many :shingle_signatures, :dependent => :destroy, :order => 'id'
+  has_many :shingle_signatures, :dependent => :destroy, :order => 'position_start asc'
   has_many :i_match_signatures, :dependent => :destroy, :order => 'id'
   has_many :min_hash_signatures, :dependent => :destroy, :order => 'id'
   has_many :super_shingle_signatures, :dependent => :destroy, :order => 'id'
@@ -16,8 +16,6 @@ class Document < ActiveRecord::Base
   attr_accessor :similar_documents_after_check, :content_after_check, :similarity, :flag_build_shingle_signatures
 
   def create_signatures
-    Rails.logger.debug { "source:#{source}" }
-    Rails.logger.debug { "content:#{content}" }
     create_shingle_signatures
     create_min_hash_signatures
     create_super_shingle_signatures
@@ -71,49 +69,59 @@ class Document < ActiveRecord::Base
   end
 
   def similarity_super_shingle_signatures
-    Document.select("DISTINCT ON (documents.id) *").joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    Document.select("DISTINCT ON (documents.id) documents.*").joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_i_match_signatures
-    Document.select("DISTINCT ON (documents.id) *").joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    Document.select("DISTINCT ON (documents.id) documents.*").joins(:i_match_signatures).where(:"i_match_signatures.token" => i_match_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_mega_shingle_signatures
-    Document.select("DISTINCT ON (documents.id) *").joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    Document.select("DISTINCT ON (documents.id) documents.*").joins(:mega_shingle_signatures).where(:"mega_shingle_signatures.token" => mega_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_min_hash_signatures
     equal_count = 0.0
-    documents = Document.select("DISTINCT ON (documents.id) *").joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+    global_equal_count = 0.0
+    min_wise_function_is_equal = {}
+    documents = Document.select("DISTINCT ON (documents.id) documents.*").joins(:min_hash_signatures).where(:"min_hash_signatures.token" => min_hash_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
 
     documents.each do |document|
       MinWise::FUNCTION_NUMBER.times do |i|
-        equal_count += 1 if min_hash_signatures[i].token.to_s == document.min_hash_signatures[i].token.to_s
+        if min_hash_signatures[i].token.to_s == document.min_hash_signatures[i].token.to_s
+          equal_count += 1
+          unless min_wise_function_is_equal.has_key?(i)
+            global_equal_count += 1
+            min_wise_function_is_equal.merge! i => true
+          end
+        end
       end
-      document.similarity = equal_count / MinWise::FUNCTION_NUMBER * 100
+      document.similarity = (equal_count / MinWise::FUNCTION_NUMBER * 100).round(0)
       equal_count = 0.0
     end
-
+    
+    self.similarity = (global_equal_count / MinWise::FUNCTION_NUMBER * 100).round(0)
     documents
   end
 
   def match_documents
-    ShingleSignature.select("DISTINCT ON (document_id) *").where(:token => shingle_signatures.map(&:token)).map(&:document).each do |document|
+    ShingleSignature.select("DISTINCT ON (document_id) shingle_signatures.*").where(:token => shingle_signatures.map(&:token)).map(&:document).each do |document|
       document.match do |shingle_signature|
         tmp = shingle_signatures.select { |s| s.token == shingle_signature.token}.first
         tmp ? shingle_signature : nil
-      end      
+      end
     end
   end
 
   def match &block
+
     t1 = Time.now
     start_shingle_signature = nil
     end_shingle_signature = nil
     number_global_shingle_signatures = 0
     prev_document_id = nil
     buffer_range = nil
-
+    Rails.logger.debug { "document_id: #{self.id}" }
     shingle_signatures.each do |shingle_signature|
       shingle_match = block ? yield(shingle_signature) : ShingleSignature.find_by_token(shingle_signature.token.to_s)
 
@@ -124,12 +132,12 @@ class Document < ActiveRecord::Base
     end
 
     if number_global_shingle_signatures > 0
-      @similarity =  (number_global_shingle_signatures * 100.0 / shingle_signatures.size).round(2)
+      @similarity =  (number_global_shingle_signatures * 100.0 / shingle_signatures.size).round(0)
     else
       @similarity = 0
     end
     t2 = Time.now
-    
+
     Rails.logger.debug { "Time match: #{t2-t1}" }
   end
 
@@ -152,7 +160,7 @@ class Document < ActiveRecord::Base
     build_i_match_signatures
     i_match_signatures.map(&:save)
   end
-    
+
   def shingle_signatures_to_cvs
   end
 
@@ -169,22 +177,21 @@ class Document < ActiveRecord::Base
       end
     end
     raw.put_copy_end
-    while res = raw.get_result 
+    while res = raw.get_result
       # Говорят что важно
     end
     ActiveRecord::Base.connection_pool.checkin(conn)
   end
-  
+
   def search_from_google
-    if shingle_signatures.count - 10 < 0
-      index = rand(shingle_signatures.count - 10)
-      position_start = shingle_signatures[index].position_start
-      position_end = shingle_signatures[index + 10].position_end
+    if content.length > 100
+      index = rand(content.length - 100)
+      position_start = index
+      position_end = index + 100
     else
-      position_start = shingle_signatures.first.position_start
-      position_end = shingle_signatures.last.position_end      
+      position_start = 0
+      position_end = content.length
     end
-    Rails.logger.debug { "query #{content[position_start..position_end]}" }
     t1 = Time.now
     documents = ScrapingGoogle.search(:query => content[position_start..position_end])
     t2 = Time.now
@@ -197,7 +204,7 @@ class Document < ActiveRecord::Base
       Rails.logger.debug { "Time in create document: #{t5-t4}" }
     end
     t3 = Time.now
-    
+
     Rails.logger.debug { "Time search_from_google: #{t2-t1}, #{t3-t2}" }
     Rails.logger.debug { "query #{content[position_start..position_end]}" }
   end

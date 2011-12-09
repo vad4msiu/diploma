@@ -6,7 +6,7 @@
   = f.password_field :password, :class => 'text_field'
 .group
   = f.label :role, t("activerecord.attributes.user.role", :default => "Роль"), :class => :label
-  = f.select :role, [['Админ', :admin], ["Пользователь", :user]]
+  = f.select :role, [['Администратор', :admin], ["Преподаватель", :teacher]]
 
 .group.navform.wat-cf
   %button.button{:type => "submit"}

@@ -2,6 +2,7 @@
 require 'nokogiri'
 require 'open-uri'
 require "cgi"
+require "iconv"
 
 module ScrapingGoogle
   def self.search(options = {})
@@ -19,6 +20,7 @@ module ScrapingGoogle
         if html.content_type == "text/html"
           doc = Nokogiri::HTML(html.read)
           doc.css('script').remove
+          doc.css('style').remove
           content = ic.iconv(doc.content)
           documents.merge! href => content
         end

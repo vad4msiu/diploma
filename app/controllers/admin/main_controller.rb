@@ -14,13 +14,11 @@ class Admin::MainController < ApplicationController
     end
     
     @document = Document.new :content => params[:content]
+        
+    @document.search_from_google if params[:web] == 'true'
+    
     case params[:type]
-    when 'web'
-      @document.build_shingle_signatures
-      @document.search_from_google
-      @document.match
-      render 'admin/main/types/shingle'      
-    when 'shingle'
+    when 'shingle'      
       @document.build_shingle_signatures
       @document.match
       render 'admin/main/types/shingle'

@@ -1,0 +1,37 @@
+.block
+  .secondary-navigation
+    %ul.wat-cf
+      %li.first= link_to "#{t("web-app-theme.list", :default => "List")}", admin_reports_path
+      %li= link_to "#{t("web-app-theme.new", :default => "New")}", new_admin_report_path
+      %li.active= link_to "#{t("web-app-theme.show", :default => "Show")}", admin_report_path
+  .content
+    .inner
+      %p
+        %b
+          = t("activerecord.attributes.admin_report.similarity", :default => t("activerecord.labels.similarity", :default => "Similarity"))
+          \:
+        = @report.similarity
+      %p
+        %b
+          = t("activerecord.attributes.admin_report.content_document", :default => t("activerecord.labels.content_document", :default => "Content document"))
+          \:
+        = @report.content_document
+      %p
+        %b
+          = t("activerecord.attributes.admin_report.content_report", :default => t("activerecord.labels.content_report", :default => "Content report"))
+          \:
+        = @report.content_report
+      %p
+        %b
+          = t("activerecord.attributes.admin_report.user_id", :default => t("activerecord.labels.user_id", :default => "User"))
+          \:
+        = @report.user_id
+      %p
+        %b
+          = t("activerecord.attributes.admin_report.state", :default => t("activerecord.labels.state", :default => "State"))
+          \:
+        = @report.state
+      .wat-cf
+        = link_to image_tag("web-app-theme/icons/application_edit.png", :alt => "#{t("web-app-theme.edit", :default=> "Edit")}") + " " + t("web-app-theme.edit", :default=> "Edit"), edit_admin_report_path(@report), :class => "button"
+        = link_to image_tag("web-app-theme/icons/cross.png", :alt => "#{t("web-app-theme.delete", :default=> "Delete")}") + " " + t("web-app-theme.delete", :default => "Delete"), admin_report_path(@report), :method => "delete", :class => "button", :confirm => "#{t("web-app-theme.confirm", :default => "Are you sure?")}"
+- content_for :sidebar, render(:partial => 'sidebar')

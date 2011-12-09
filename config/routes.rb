@@ -32,6 +32,7 @@ Diploma::Application.routes.draw do
     resources :min_hash_signatures
     resources :words
     resources :users
+    resources :reports, :only => [:index, :show]
   end
   
   # The priority is based upon order of creation:
