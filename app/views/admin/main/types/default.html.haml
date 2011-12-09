@@ -3,15 +3,14 @@
     %h2.title Отчет
     .inner
       = raw @document.content
-      %h3.title= "Схожесть #{@document.similarity} %"
+      %h3.title= "Схожесть #{@document.similarity} %" if @document.similarity.present?
       %h3.title= "Заимствовано из документов"
       %ul.list
         - @documents.each do |document|
           %li
             .left{:style => 'padding-right:10px;height:50px;'}
               = link_to "Documtn id #{document.id}", admin_document_path(document.id)
-              = document.similarity
-              \%
+              = "#{document.similarity} %" if document.similarity.present?
             .item
               %p
                 = document.content.truncate(200)

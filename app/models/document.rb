@@ -2,12 +2,12 @@
 require 'csv'
 
 class Document < ActiveRecord::Base
-
   has_many :shingle_signatures, :dependent => :destroy, :order => 'position_start asc'
   has_many :i_match_signatures, :dependent => :destroy, :order => 'id'
   has_many :min_hash_signatures, :dependent => :destroy, :order => 'id'
   has_many :super_shingle_signatures, :dependent => :destroy, :order => 'id'
   has_many :mega_shingle_signatures, :dependent => :destroy, :order => 'id'
+  has_many :long_sent_signatures, :dependent => :destroy, :order => 'id'
 
   validates :content, :presence => true
 
@@ -20,8 +20,22 @@ class Document < ActiveRecord::Base
     create_min_hash_signatures
     create_super_shingle_signatures
     create_mega_shingle_signatures
+    create_long_sent_signatures
     # create_i_match_signatures
     # update_dictionary
+  end
+  
+  def build_long_sent_signatures
+    max1, max2 = '', ''
+    
+    content.split(/[.!?]+/).each  do |sent|
+      if max1.length < sent.length
+        max1 = sent
+        max2 = max1
+      end
+    end
+    
+    long_sent_signatures.new(:token => Digest::MD5.hexdigest([max1, max2].sort.join))
   end
 
   def build_mega_shingle_signatures
@@ -70,6 +84,10 @@ class Document < ActiveRecord::Base
 
   def similarity_super_shingle_signatures
     Document.select("DISTINCT ON (documents.id) documents.*").joins(:super_shingle_signatures).where(:"super_shingle_signatures.token" => super_shingle_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
+  end
+  
+  def similarity_long_sent_signatures
+    Document.select("DISTINCT ON (documents.id) documents.*").joins(:long_sent_signatures).where(:"long_sent_signatures.token" => long_sent_signatures.map(&:token).map(&:to_s))#.group(:"documents.id")
   end
 
   def similarity_i_match_signatures
@@ -161,7 +179,9 @@ class Document < ActiveRecord::Base
     i_match_signatures.map(&:save)
   end
 
-  def shingle_signatures_to_cvs
+  def create_long_sent_signatures
+    build_long_sent_signatures
+    long_sent_signatures.map(&:save)    
   end
 
   def create_shingle_signatures

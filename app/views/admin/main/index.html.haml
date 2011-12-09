@@ -6,7 +6,7 @@
         .group
           = label :type, "с помощью:", :class => 'label'
         .group
-          = select_tag :type, options_for_select(%w(shingle super-shingle mega-shingle min-hash i-match).map {|i| [i, i]})
+          = select_tag :type, options_for_select(%w(shingle super-shingle mega-shingle min-hash i-match long_sent).map {|i| [i, i]})
         .group          
           = check_box_tag :web, true, false, :class => 'checkbox'
           = label :type, "искать в интеренет", :class => 'checkbox'

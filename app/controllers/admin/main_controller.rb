@@ -45,6 +45,11 @@ class Admin::MainController < ApplicationController
       @document.build_i_match_signatures
       @documents = @document.similarity_i_match_signatures
       render 'admin/main/types/default'
+    when 'long_sent'
+      @document.build_long_sent_signatures
+      @documents = @document.similarity_long_sent_signatures
+      render 'admin/main/types/default'
+      
     end
   end
 
