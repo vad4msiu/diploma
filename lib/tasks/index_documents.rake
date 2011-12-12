@@ -14,7 +14,7 @@ namespace :documents do
           if FileTest.file?(file_path)
             begin
               time = Benchmark.realtime do
-                Document.create :content => File.read(file_path)
+                Document.create :content => File.read(file_path).gsub(/[^А-ЯЁа-яёA-Za-z \.\n?!:;,]/, '')
               end
               puts "#{index} => Process file #{file_path}, #{time}"
             rescue Exception => e
