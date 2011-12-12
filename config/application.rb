@@ -45,5 +45,9 @@ module Diploma
 
     # Version of your assets, change this if you want to expire all your assets
     # config.assets.version = '1.0'
+    
+    config.after_initialize do      
+      DICTIONARY = Word.where(:idf => (5.4)..(5.7)).map(&:term).to_set
+    end
   end
 end

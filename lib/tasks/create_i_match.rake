@@ -5,8 +5,7 @@ namespace :documents do
   task :"re-i-match" => :environment do
     global_words = {}
     Document.all.each do |document|
-      document.i_match_signatures.destroy_all
-      current_words = document.content.split(/[^А-ЯЁа-яё]+/).to_set
+      current_words = document.content.split(/[^А-ЯЁа-яё]+/).map{|w| Unicode::downcase(w)}.to_set
       current_words.each do |word|
         if global_words.has_key?(word)
           global_words[word] += 1
@@ -24,6 +23,7 @@ namespace :documents do
                   :idf => Math.log2(document_count / number_documents_found))
     end
     
+    IMatchSignature.destroy_all
     Document.all.each do |document|
       document.create_i_match_signatures
     end

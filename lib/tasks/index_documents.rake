@@ -8,17 +8,20 @@ namespace :documents do
   task :import => :environment do
     # RubyProf.start
     if ENV["DIR"]
+      index = 1
       time_all = Benchmark.realtime do
         Find.find(ENV["DIR"]) do |file_path|
           if FileTest.file?(file_path)
             begin
               time = Benchmark.realtime do
-                Document.create :content => File.open(file_path).read
+                Document.create :content => File.read(file_path)
               end
-              puts "Process file #{file_path}, #{time}"
+              puts "#{index} => Process file #{file_path}, #{time}"
             rescue Exception => e
-              puts "Error: #{e}\n#{e.backtrace.join('\n')}"
-            end                
+              puts "#{index} => Error: #{e}\n#{e.backtrace.join('\n')}"
+            end
+            
+            index += 1
           end
         end
       end

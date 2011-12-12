@@ -1,17 +1,20 @@
 namespace :rewrite_documents do
   desc "RewriteDocument create report"
   task :create_report => :environment do
-    offset = ENV["OFFSET"].to_i || 0
-    index = offset
+    offset = (ENV["OFFSET"] || 0).to_i
+    index = offset + 1
     puts "All number documents #{RewriteDocument.count - offset}"
     time_all = Benchmark.realtime do
       RewriteDocument.order(:id).offset(offset).each do |rewrite_document|
-        time = Benchmark.realtime do          
-          rewrite_document.build_report(:algorithm => 'shingle')
-          rewrite_document.report.generate_and_save :content => rewrite_document.content
-          index += 1
+        puts "#{index} => Process document id: #{rewrite_document.id}"        
+        %w(shingle super-shingle mega-shingle min-hash i-match long-sent).each do |algorithm|
+          time = Benchmark.realtime do            
+            rewrite_document.build_report(:algorithm => algorithm)
+            rewrite_document.report.generate_and_save :content => rewrite_document.content
+          end
+          puts "----#{algorithm}, #{time}"
         end
-        puts "#{index} => Process document id: #{rewrite_document.id}, #{time}"
+        index += 1
       end
     end
 

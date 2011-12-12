@@ -31,14 +31,23 @@ class Report < ActiveRecord::Base
   end
 
   def serialized_object=(object)
-    write_attribute :serialized_object, ActiveSupport::Base64.encode64(Marshal.dump(object))
+    Report.benchmark("Report#serialized_object=") do 
+      write_attribute :serialized_object, ActiveSupport::Base64.encode64(Marshal.dump(object))
+    end
   end
 
   def serialized_object
-    Marshal.load(ActiveSupport::Base64.decode64(read_attribute :serialized_object))
+    Report.benchmark("Report#serialized_object") do 
+      Marshal.load(ActiveSupport::Base64.decode64(read_attribute :serialized_object))
+    end
+  end
+  
+  def generate_and_save
+    generate
+    save!
   end
 
-  def generate_and_save options = {}
+  def generate options = {}
     process!
     @document = Document.new :content => options[:content]
     @document.search_from_web if options[:web] == true
@@ -64,13 +73,12 @@ class Report < ActiveRecord::Base
     when 'i-match'
       @document.build_i_match_signatures
       @document.similarity_i_match_signatures
-    when 'long_sent'
+    when 'long-sent'
       @document.build_long_sent_signatures
       @document.similarity_long_sent_signatures
     end
     self.similarity = @document.similarity
     self.serialized_object = @document
-    complite!
-    save!
+    complite!   
   end
 end

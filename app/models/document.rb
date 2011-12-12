@@ -109,7 +109,7 @@ class Document < ActiveRecord::Base
 
   def build_i_match_signatures
     current_words = content.split(/[^А-ЯЁа-яё]+/).to_set
-    i_match_signatures.new(:token => Digest::MD5.hexdigest((current_words & Word.where(:idf => 2..4).map(&:term).to_set).to_a.sort.join))
+    i_match_signatures.new(:token => Digest::MD5.hexdigest((current_words & Diploma::Application::DICTIONARY).to_a.sort.join))
   end
 
   def similarity_super_shingle_signatures
@@ -193,8 +193,7 @@ class Document < ActiveRecord::Base
                                                :color => color)
       end
     end
-    
-    # Rails.logger.debug { "message: #{number_matched}" }    
+
     @similarity =  number_matched > 0 ? (number_matched * 100.0 / (shingle_signatures.size)).round(0) : 0
   end
 
@@ -275,7 +274,8 @@ class Document < ActiveRecord::Base
   def rewrite options = {}
     index = 0
     rewrite_content = ''
-    while index <= content.length
+    length = (options[:content_length] ? content.length / 100.0 * options[:content_length] : content.length).to_i
+    while index <= length
       begin
         Net::HTTP::Proxy(Proxy.get, 8080, '10mnxnnK9GfM', 'MzGu0aXR9C').start('seogenerator.ru') do |http|
           data = "text=#{CGI::escape(content[index...(index + 5000)])}&base=sm2&type=first&format=text"
