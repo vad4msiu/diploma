@@ -2,20 +2,20 @@
   .content
     %h2.title Загрузка текста
     .inner
-      = form_tag admin_check_similarity_path, :class => 'form', :multipart => true do
+      = form_for @report, :url => admin_reports_path, :html => { :class => 'form', :multipart => true } do
         .group
-          = label :type, "с помощью:", :class => 'label'
+          = label :algorithm, "проверка с помощью:", :class => 'label'
         .group
-          = select_tag :type, options_for_select(%w(shingle super-shingle mega-shingle min-hash i-match long_sent).map {|i| [i, i]})
+          = select_tag :algorithm, options_for_select(%w(shingle super-shingle mega-shingle min-hash i-match long_sent).map {|i| [i, i]})
         .group          
           = check_box_tag :web, true, false, :class => 'checkbox'
-          = label :type, "искать в интеренет", :class => 'checkbox'
+          = label :type, "искать в интернете", :class => 'checkbox'
         .group
-          = label :type, "из файла:", :class => 'label'
+          = label :file, "из файла:", :class => 'label'
         .group
           = file_field_tag :file
         .group
-          = label :type, "или", :class => 'label'
+          = label :content, "или", :class => 'label'
         .group
           = text_area_tag :content, params[:content], :class => 'text_area', :rows => 20
         .group.navform.wat-cf

@@ -4,14 +4,14 @@ require 'open-uri'
 require "cgi"
 require "iconv"
 
-module ScrapingGoogle
+module ScrapingYandex
   def self.search(options = {})
     raise ArgumentError, "Query is not a Hash" unless options.is_a? Hash
     raise ArgumentError, "Is not empty query" unless options[:query]
     ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
     documents = {}
-    issuance = Nokogiri::HTML(open("http://www.google.com/search?q=#{CGI::escape(options[:query])}").read)
-    issuance.css('h3.r a').each do |link|
+    issuance = Nokogiri::HTML(open("http://yandex.ru/yandsearch?text=#{CGI::escape(options[:query])}").read)
+    issuance.css('a.b-serp-item__title-link').each do |link|
       begin
         href = link.attributes["href"].content
         html = open(href)

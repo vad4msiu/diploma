@@ -6,7 +6,7 @@ class Ability
       can :manage, :all
     elsif user.role? :teacher
       can :read, Document
-      can :read, Report, :user_id => user.id
+      can :manage, Report#, :user_id => user.id
     end
   end
 end

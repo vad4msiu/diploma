@@ -1,7 +1,7 @@
 !!!
 %html
   %head
-    %title Web App
+    %title Проверка текста на наличие заимствований    
     = stylesheet_link_tag 'base', 'style'
     = javascript_include_tag 'jquery', 'jquery_ujs', 'application'
     = csrf_meta_tag
@@ -9,7 +9,7 @@
     #container
       #header
         %h1
-          %a{:href => "/"} Проверка текста на наличие заимствований
+          = link_to 'Проверка текста на наличие заимствований', root_path
         #user-navigation
           %ul.wat-cf
             %li= link_to 'Выйти', destroy_user_session_path, :class => "logout"
@@ -20,6 +20,7 @@
         #main-navigation
           %ul.wat-cf
             %li= link_to 'Проверить документ', root_path
+            %li= link_to 'Отчеты', admin_reports_path
             - if current_user.role? :admin
               %li= link_to 'Documents', admin_documents_path
               %li= link_to 'Shingle signatures', admin_shingle_signatures_path

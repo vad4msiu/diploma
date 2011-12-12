@@ -473,3 +473,7 @@ a.button:active, button.button:active {
 	cursor:pointer;
 	background-color: #FFDEAD;
 }
+
+#sidebar h3 {
+	padding-left:0;
+}

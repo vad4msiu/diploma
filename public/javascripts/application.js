@@ -3,16 +3,16 @@ $(document).ready(function() {
     var backgroundOld = null;
     var tokenOld = null;
 
-    // function goToByScroll(token) {
-    //     $('html,body').animate({
-    //         scrollTop: $(".document [data-shingle-signature-token=" + token + "]").offset().top
-    //     },
-    //     'slow');
-    // };
+    function goToByScroll(token) {
+        $('html,body').animate({
+            scrollTop: $(".document [data-shingle-signature-token=" + token + "]").offset().top
+        },
+        'slow');
+    };
 
     $('.shingle-signature').live("click",
     function() {
-        var tmp = $('#document-' + $(this).attr("data-document-id"));
+        var tmp = null;
         var token = $(this).attr("data-shingle-signature-token");
 
         if (tokenOld != null) {
@@ -28,6 +28,9 @@ $(document).ready(function() {
         $("[data-shingle-signature-token=" + token + "]").each(
         function() {
             $(this).css("background-color", "#FFDEAD");
+						if ($(this).parent().hasClass('matched-document')) {
+							tmp = $(this).parent();
+						};						
         });
 
         if (documentShow != null) {
@@ -38,9 +41,9 @@ $(document).ready(function() {
             };
         } else {
             documentShow = tmp;
-            documentShow.show("slow");
+            documentShow.show("fast");
         };
 
-        // goToByScroll(token);
+        goToByScroll(token);
     });
 });

@@ -2,9 +2,16 @@
   .content
     %h2.title Отчет
     .inner
-      - benchmark("Showing document content") do
-        = match_highlight @document
+      / - benchmark("Showing document content") do
+      = paint @document
       %h3.title= "Схожесть #{@document.similarity} %"
       - content_for :sidebar do
-        - benchmark("Showing sidebar document content") do
-          = match_highlight_documents @document.match_documents
+        / - benchmark("Showing sidebar document content") do
+        - @document.matched_documents.each_value do |matched_document|
+          %div{ :class => 'hide matched-document', :id => "document-#{matched_document.id}" }
+            %h3
+              = link_to "Document id: #{matched_document.id}", admin_document_path(matched_document)
+              - if matched_document.source.present?
+                , Source:
+                = matched_document.source
+            = paint matched_document
