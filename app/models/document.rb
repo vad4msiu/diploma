@@ -9,7 +9,7 @@ class Document < ActiveRecord::Base
   has_many :super_shingle_signatures, :dependent => :destroy
   has_many :mega_shingle_signatures, :dependent => :destroy
   has_many :long_sent_signatures, :dependent => :destroy
-  has_one :rewrite_document
+  has_many :rewrite_documents, :dependent => :destroy
 
   validates :content, :presence => true
 

@@ -8,7 +8,7 @@ namespace :documents do
     time_all = Benchmark.realtime do
       Document.order(:id).offset(offset).each do |document|
         puts "#{index} => Process document id: #{document.id}"
-        document.rewrite_document.create(:content => document.rewrite(:content_length => content_length))
+        document.rewrite_documents.create(:content => document.rewrite(:content_length => content_length))
         index += 1
       end
     end
