@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111211184237) do
+ActiveRecord::Schema.define(:version => 20111213234948) do
 
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",   :default => 0
@@ -75,6 +75,7 @@ ActiveRecord::Schema.define(:version => 20111211184237) do
     t.datetime "updated_at"
     t.string   "algorithm"
     t.text     "serialized_object"
+    t.integer  "document_id"
   end
 
   create_table "rewrite_documents", :force => true do |t|

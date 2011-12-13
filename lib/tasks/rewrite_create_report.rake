@@ -13,9 +13,8 @@ namespace :rewrite_documents do
 
         %w(shingle super-shingle mega-shingle min-hash i-match long-sent).each do |algorithm|
           time = Benchmark.realtime do            
-            rewrite_document.build_report(:algorithm => algorithm)
+            rewrite_document.build_report(:algorithm => algorithm, :document_id => rewrite_document.document_id)
             rewrite_document.report.generate_and_save :document => document.clone
-            rewrite_document.update_attribute :report_id, rewrite_document.report.id
           end
           puts "----#{algorithm}, #{time}"
         end
