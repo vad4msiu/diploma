@@ -42,9 +42,13 @@ class Report < ActiveRecord::Base
     end
   end
   
-  def generate_and_save
-    generate
+  def generate_and_save options = {}
+    generate options
     save!
+  end
+  
+  def similarity
+    (read_attribute :similarity).round(0)    
   end
 
   def generate options = {}

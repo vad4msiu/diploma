@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 require 'find'
 require 'digest/md5'
 require 'benchmark'
@@ -14,7 +15,7 @@ namespace :documents do
           if FileTest.file?(file_path)
             begin
               time = Benchmark.realtime do
-                Document.create :content => File.read(file_path).gsub(/[^А-ЯЁа-яёA-Za-z \.\n?!:;,]/, '')
+                Document.create :content => File.read(file_path).gsub(/[^[:word:][:space:][:punct:]]/, '')
               end
               puts "#{index} => Process file #{file_path}, #{time}"
             rescue Exception => e

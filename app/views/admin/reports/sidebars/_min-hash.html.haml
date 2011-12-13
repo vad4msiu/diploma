@@ -1,0 +1,10 @@
+- content_for :sidebar do
+  %ul.list
+    - @document.matched_documents.each do |document|
+      %li      
+        .left{:style => 'padding-right:10px;height:50px;'}
+          / = link_to "Documtn id #{document.id}", admin_document_path(document.id)
+          = "#{document.similarity} %" if document.similarity.present?
+        .item
+          %p
+            = link_to document.content.truncate(200), admin_document_path(document.id), :style => 'text-decoration:underline;display:block'

@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class CreateRewriteDocuments < ActiveRecord::Migration
   def change
     create_table :rewrite_documents do |t|

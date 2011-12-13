@@ -1,0 +1,10 @@
+- content_for :sidebar do
+  - benchmark("Showing sidebar document content") do
+    - @document.matched_documents.each do |matched_document|
+      %div{ :class => 'hide matched-document', :id => "document-#{matched_document.id}" }
+        %h3
+          = link_to "Document id: #{matched_document.id}", admin_document_path(matched_document)
+          - if matched_document.source.present?
+            , Source:
+            = matched_document.source
+        = paint matched_document

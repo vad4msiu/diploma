@@ -27,7 +27,7 @@ $(document).ready(function() {
 
         $("[data-shingle-signature-token=" + token + "]").each(
         function() {
-            $(this).css("background-color", "#FFDEAD");
+            $(this).css("background-color", "#D3ECC7");
 						if ($(this).parent().hasClass('matched-document')) {
 							tmp = $(this).parent();
 						};						

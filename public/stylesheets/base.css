@@ -77,7 +77,7 @@ body {
 }
 
 #sidebar h3 {  
-  padding: 10px 15px;
+  padding: 3px 15px;
   margin: 0;
   font-size: 13px;
 }
@@ -319,7 +319,7 @@ ul.list li .left .avatar {
 }
 
 ul.list li .item {
-  margin-left: 80px;
+/*  margin-left: 80px;*/
 }
 
 ul.list li .item .avatar {

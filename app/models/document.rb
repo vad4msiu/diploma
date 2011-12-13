@@ -46,7 +46,7 @@ class Document < ActiveRecord::Base
     if long_sent_signatures.empty?
       max1, max2 = '', ''
 
-      content.split(/[.!?]+/).each  do |sent|
+      content.split(/[[:cntrl:][:punct:]]/).each  do |sent|
         if max1.length < sent.length
           max1 = sent
           max2 = max1
@@ -272,16 +272,19 @@ class Document < ActiveRecord::Base
   end
 
   def rewrite options = {}
-    index = 0
+    position_start = 0
+    position_end = 0
     rewrite_content = ''
     length = (options[:content_length] ? content.length / 100.0 * options[:content_length] : content.length).to_i
-    while index <= length
+    Rails.logger.debug { "length: #{length}" }
+    while position_start <= length
       begin
         Net::HTTP::Proxy(Proxy.get, 8080, '10mnxnnK9GfM', 'MzGu0aXR9C').start('seogenerator.ru') do |http|
-          data = "text=#{CGI::escape(content[index...(index + 5000)])}&base=sm2&type=first&format=text"
+          position_end = (position_start + 5000) < length ? position_start + 5000 : length
+          data = "text=#{CGI::escape(content[position_start...position_end])}&base=sm2&type=first&format=text"
           resp, data = http.post('/api/synonym/', data, {})
           rewrite_content += CGI::unescape(data.gsub('\x', '%'))
-          index += 5000
+          position_start += 5000
           if data == 'Exceeded the limit queries from this IP address'
             puts "Exceeded the limit queries from this IP address"
             Rails.logger.debug { "Exceeded the limit queries from this IP address" }
@@ -294,7 +297,8 @@ class Document < ActiveRecord::Base
         retry
       end
     end
-
+    
+    rewrite_content += content[position_end...content.length]
     return rewrite_content
   end
 

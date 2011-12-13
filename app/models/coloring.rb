@@ -1,3 +1,4 @@
+# -*- encoding : utf-8 -*-
 class Coloring
   attr_reader :position_start, :position_end, :color, :token
   
