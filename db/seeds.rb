@@ -12,5 +12,11 @@ if User.count == 0
   u.role = :admin
   u.password = "qweqwe"
   u.save!
+  
+  u = User.new(email: "qwe@qwe.com")
+  u.role = :teacher
+  u.password = "qweqwe"
+  u.save!
+  
 end
 
