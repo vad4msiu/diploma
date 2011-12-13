@@ -6,11 +6,15 @@ namespace :rewrite_documents do
     puts "All number documents #{RewriteDocument.count - offset}"
     time_all = Benchmark.realtime do
       RewriteDocument.order(:id).offset(offset).each do |rewrite_document|
-        puts "#{index} => Process document id: #{rewrite_document.id}"        
+        puts "#{index} => Process document id: #{rewrite_document.id}"
+        document = Document.new(:content => rewrite_document.content)
+        document.build_shingle_signatures
+        document.build_min_hash_signatures
+
         %w(shingle super-shingle mega-shingle min-hash i-match long-sent).each do |algorithm|
           time = Benchmark.realtime do            
             rewrite_document.build_report(:algorithm => algorithm)
-            rewrite_document.report.generate_and_save :content => rewrite_document.content
+            rewrite_document.report.generate_and_save :document => document.clone
           end
           puts "----#{algorithm}, #{time}"
         end

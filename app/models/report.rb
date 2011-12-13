@@ -29,7 +29,8 @@ class Report < ActiveRecord::Base
   def cancel_generate
     initial!
   end
-
+  
+  # TODO Сериализация это плохо!
   def serialized_object=(object)
     Report.benchmark("Report#serialized_object=") do 
       write_attribute :serialized_object, ActiveSupport::Base64.encode64(Marshal.dump(object))
@@ -53,7 +54,7 @@ class Report < ActiveRecord::Base
 
   def generate options = {}
     process!
-    @document = Document.new :content => options[:content]
+    @document = options[:document].present? ? options[:document] : Document.new(:content => options[:content])
     @document.search_from_web if options[:web] == true
     case algorithm
     when 'shingle'

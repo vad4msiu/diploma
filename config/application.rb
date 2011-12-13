@@ -47,7 +47,22 @@ module Diploma
     # config.assets.version = '1.0'
     
     config.after_initialize do      
-      DICTIONARY = Word.where(:idf => (5.4)..(5.7)).map(&:term).to_set
+      begin
+        DICTIONARY = Word.where(:idf => (5.4)..(5.7)).map(&:term).to_set
+      rescue Exception => e
+        puts 'run migrate!'
+      end
+
+      ALPHABETIC = {'A' => 'А', 'a' => 'а',
+                    'E' => 'Е', 'e' => 'е', 
+                    'K' => 'К', 'M' => 'М', 
+                    'H' => 'Н', 'O' => 'О', 
+                    'o' => 'о', 'P' => 'Р', 
+                    'p' => 'р', 'T' => 'Т', 
+                    'C' => 'С', 'c' => 'с',
+                    'B' => 'В', 'X' => 'Х',
+                    'x' => 'х'}
+      ALPHABETIC_INVERT = ALPHABETIC.invert
     end
   end
 end

@@ -24,7 +24,7 @@ class Shingling
     position_start, position_end = 0, 0
     
     @content.each_char do |char|
-      char = @replace_chars[char] if @replace_chars.key? char
+      char = @replace_chars[char] if @replace_chars.has_key? char
       if char !~ /[А-ЯЁа-яё]/
         char_flag = true
       else

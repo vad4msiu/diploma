@@ -88,6 +88,7 @@ class Document < ActiveRecord::Base
     if shingle_signatures.empty?
       shingling = Shingling.new(
         content,
+        :replace_chars => Diploma::Application::ALPHABETIC,
         :stop_words => Text::STOP_WORDS,
         :shingle_length => ShingleSignature::SHNINGLE_LENGTH,
         :downcase => true
@@ -247,7 +248,7 @@ class Document < ActiveRecord::Base
     end
     ActiveRecord::Base.connection_pool.checkin(conn)
   end
-  
+
   def search_from_web
     query = query_for_search_from_web
     search_from_yandex query
@@ -271,10 +272,36 @@ class Document < ActiveRecord::Base
     return index
   end
 
+  def shuffle_sentences options = {}
+    shuffle_precent = options[:shuffle_precent] || 20
+    sentences = content.clone.split(/[\.!?;]/)
+    shuffle_size = (sentences.size.to_f / 100 * shuffle_precent).to_i
+    sentences[0...shuffle_size] = sentences[0...shuffle_size].sort_by{ rand }
+    
+    return sentences.join('.')
+  end
+
+  def shuffle_paragraphs options = {}
+    shuffle_precent = options[:shuffle_precent] || 10
+    sentences = content.clone.split(/\n/)
+    shuffle_size = (sentences.size.to_f / 100 * shuffle_precent).to_i
+    sentences[0...shuffle_size] = sentences[0...shuffle_size].sort_by{ rand }
+
+    return sentences.join('.')
+  end
+
+  def alphabetic
+    content.gsub(/[#{Diploma::Application::ALPHABETIC_INVERT.keys.join}]/) do |char| 
+      Diploma::Application::ALPHABETIC_INVERT[char]
+    end
+  end
+
+  # Не понятно откуда вылазять не UTF символы. По этому всячески их пытаемся убрать
   def rewrite options = {}
     position_start = 0
     position_end = 0
     rewrite_content = ''
+    ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
     length = (options[:content_length] ? content.length / 100.0 * options[:content_length] : content.length).to_i
     Rails.logger.debug { "length: #{length}" }
     while position_start <= length
@@ -283,7 +310,7 @@ class Document < ActiveRecord::Base
           position_end = (position_start + 5000) < length ? position_start + 5000 : length
           data = "text=#{CGI::escape(content[position_start...position_end])}&base=sm2&type=first&format=text"
           resp, data = http.post('/api/synonym/', data, {})
-          rewrite_content += CGI::unescape(data.gsub('\x', '%'))
+          rewrite_content += data = ic.iconv(CGI::unescape(data.gsub('\x', '%')) + ' ')[0..-2]
           position_start += 5000
           if data == 'Exceeded the limit queries from this IP address'
             puts "Exceeded the limit queries from this IP address"
@@ -291,19 +318,19 @@ class Document < ActiveRecord::Base
           end
         end
       rescue Exception => e
-        Rails.logger.debug { "#{e}" }
-        puts e
+        Rails.logger.debug { "#{e.class}:#{e.message}\n#{e.backtrace}" }
+        puts "#{e.class}:#{e.message}\n#{e.backtrace}"
         sleep 1
         retry
       end
     end
-    
+
     rewrite_content += content[position_end...content.length]
     return rewrite_content
   end
 
   private
-  
+
   def search_from_yandex query
     Document.benchmark("#search_from_yandex") do
       documents = nil
@@ -349,7 +376,7 @@ class Document < ActiveRecord::Base
       end
     end
   end
-  
+
   def query_for_search_from_web
     length = 300
     if content.length > length
@@ -371,8 +398,8 @@ class Document < ActiveRecord::Base
       position_start = 0
       position_end = content.length
     end
-    
-    return content[position_start..position_end].strip    
+
+    return content[position_start..position_end].strip
   end
 
   def generate_combinations_for_mega_shingle
