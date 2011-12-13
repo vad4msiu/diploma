@@ -67,12 +67,19 @@ class Document < ActiveRecord::Base
 
   def build_super_shingle_signatures
     if super_shingle_signatures.empty?
-      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[0...14].map(&:token).join))
-      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[14...28].map(&:token).join))
-      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[28...42].map(&:token).join))
-      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[42...56].map(&:token).join))
-      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[56...70].map(&:token).join))
-      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[70...84].map(&:token).join))
+      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[0...6].map(&:token).join))
+      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[6...12].map(&:token).join))
+      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[12...18].map(&:token).join))
+      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[18...24].map(&:token).join))
+      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[24...30].map(&:token).join))
+      super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[30...36].map(&:token).join))      
+      
+      # super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[0...14].map(&:token).join))
+      # super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[14...28].map(&:token).join))
+      # super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[28...42].map(&:token).join))
+      # super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[42...56].map(&:token).join))
+      # super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[56...70].map(&:token).join))
+      # super_shingle_signatures.new(:token => Digest::MD5.hexdigest(min_hash_signatures[70...84].map(&:token).join))
     end
   end
 
