@@ -6,7 +6,7 @@ task :result => :environment do
     a = 0
     b = Report.where("algorithm=? and similarity>=?", algorithm, eq).count
     Report.where("algorithm=?", algorithm).each do |report|
-      a += 1 if report.serialized_object.matched_documents && report.serialized_object.matched_documents.map(&:id).include? report.rewrite_document.document.id
+      a += 1 if report.serialized_object.matched_documents && report.serialized_object.matched_documents.map(&:id).include?(report.rewrite_document.document.id)
     end
     puts "#{algorithm}: полнота #{b}, точность #{a}"
   end
