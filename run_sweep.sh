@@ -13,7 +13,7 @@ echo 'rewrite'
 # psql -U postgres diploma_production < backup/DEFAULT_SHINGLE_LENGTH_3_new.backup &&
 # rake documents:rewrite CONTENT_LENGTH=60 RAILS_ENV=production --trace &&
 # rake rewrite_documents:create_report RAILS_ENV=production --trace &&
-# /Library/PostgreSQL/9.1/bin/pg_dump -U postgres diploma_production > backup/100_30_REWRITE_SHINGLE_LENGTH_3_new.backup
+# /Library/PostgreSQL/9.1/bin/pg_dump -U postgres diploma_production > binackup/100_30_REWRITE_SHINGLE_LENGTH_3_new.backup
 
 echo "40"
 rake db:drop db:create RAILS_ENV=production --trace &&
