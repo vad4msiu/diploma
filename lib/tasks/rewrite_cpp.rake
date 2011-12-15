@@ -21,23 +21,23 @@ namespace :documents do
           f = File.new(rd_filename, 'w')
           f.write(rd.content)
           f.close
-          sim = `./levenshtein #{d_filename} #{rd_filename}`.to_f
+          sim = `./lev_fast #{d_filename} #{rd_filename}`.to_f
           rd.sim = sim
           puts "#{sim} sinomizer_#{content_length}"
           rd.duplicate = sim > sim_threshold ? true : false
           rd.save!          
         end
-        rd = document.rewrite_documents.create(:content => document.alphabetic,
-                                        :rewrite_type => "alphabetic", :sim_type => 'cpp')
-        rd_filename = "./documents/rewrite/alphabetic_#{document.id}_#{rd.id}.txt"
-        f = File.new(rd_filename, 'w')
-        f.write(rd.content)
-        f.close
-        sim = `./levenshtein #{d_filename} #{rd_filename}`.to_f
-        puts "#{sim} alphabetic"
-        rd.sim = sim
-        rd.duplicate = sim > sim_threshold ? true : false
-        rd.save!
+        # rd = document.rewrite_documents.create(:content => document.alphabetic,
+        #                                 :rewrite_type => "alphabetic", :sim_type => 'cpp')
+        # rd_filename = "./documents/rewrite/alphabetic_#{document.id}_#{rd.id}.txt"
+        # f = File.new(rd_filename, 'w')
+        # f.write(rd.content)
+        # f.close
+        # sim = `./lev_fast #{d_filename} #{rd_filename}`.to_f
+        # puts "#{sim} alphabetic"
+        # rd.sim = sim
+        # rd.duplicate = sim > sim_threshold ? true : false
+        # rd.save!
 
         rd = document.rewrite_documents.create(:content => document.shuffle_paragraphs,
                                         :rewrite_type => "shuffle_paragraphs", :sim_type => 'cpp')
@@ -45,7 +45,7 @@ namespace :documents do
         f = File.new(rd_filename, 'w')
         f.write(rd.content)
         f.close
-        sim = `./levenshtein #{d_filename} #{rd_filename}`.to_f
+        sim = `./lev_fast #{d_filename} #{rd_filename}`.to_f
         puts "#{sim} shuffle_paragraphs"
         rd.sim = sim
         rd.duplicate = sim > sim_threshold ? true : false
@@ -57,7 +57,7 @@ namespace :documents do
         f = File.new(rd_filename, 'w')
         f.write(rd.content)
         f.close
-        sim = `./levenshtein #{d_filename} #{rd_filename}`.to_f
+        sim = `./lev_fast #{d_filename} #{rd_filename}`.to_f
         puts "#{sim} shuffle_sentences"
         rd.sim = sim
         rd.duplicate = sim > sim_threshold ? true : false

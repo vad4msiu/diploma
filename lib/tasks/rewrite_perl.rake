@@ -1,11 +1,11 @@
 namespace :documents do
   desc "Rewrite documents"
-  task :rewrite => :environment do
+  task :rewrite_perl => :environment do
     offset = (ENV["OFFSET"] || 0).to_i
     # content_length = (ENV["CONTENT_LENGTH"] || 100).to_i
     index = offset + 1
     sim_threshold = 80
-    RewriteDocument.destroy_all
+    RewriteDocument.where(:sim_type => 'perl').destroy_all
     puts "All number documents #{Document.count - offset}"
     time_all = Benchmark.realtime do
       Document.order(:id).offset(offset).each do |document|
@@ -16,7 +16,8 @@ namespace :documents do
         f.close
         [60, 40, 20, 5].each do |content_length|
           rd = document.rewrite_documents.create(:content => document.rewrite(:content_length => content_length),
-                                          :rewrite_type => "sinomizer_#{content_length}")
+                                          :rewrite_type => "sinomizer_#{content_length}",
+                                          :sim_type => 'perl')
           rd_filename = "./documents/rewrite/sinomizer_#{content_length}_#{document.id}_#{rd.id}.txt"
           f = File.new(rd_filename, 'w')
           f.write(rd.content)
@@ -28,7 +29,8 @@ namespace :documents do
           rd.save!          
         end
         rd = document.rewrite_documents.create(:content => document.alphabetic,
-                                        :rewrite_type => "alphabetic")
+                                        :rewrite_type => "alphabetic",
+                                        :sim_type => 'perl')
         rd_filename = "./documents/rewrite/alphabetic_#{document.id}_#{rd.id}.txt"
         f = File.new(rd_filename, 'w')
         f.write(rd.content)
@@ -40,7 +42,8 @@ namespace :documents do
         rd.save!
 
         rd = document.rewrite_documents.create(:content => document.shuffle_paragraphs,
-                                        :rewrite_type => "shuffle_paragraphs")
+                                        :rewrite_type => "shuffle_paragraphs",
+                                        :sim_type => 'perl')
         rd_filename = "./documents/rewrite/shuffle_paragraphs_#{document.id}_#{rd.id}.txt"
         f = File.new(rd_filename, 'w')
         f.write(rd.content)
@@ -52,7 +55,8 @@ namespace :documents do
         rd.save!
         
         rd = document.rewrite_documents.create(:content => document.shuffle_sentences,
-                                        :rewrite_type => "shuffle_sentences")
+                                        :rewrite_type => "shuffle_sentences",
+                                        :sim_type => 'perl')
         rd_filename = "./documents/rewrite/shuffle_sentences_#{document.id}_#{rd.id}.txt"
         f = File.new(rd_filename, 'w')
         f.write(rd.content)

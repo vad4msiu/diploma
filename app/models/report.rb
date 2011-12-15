@@ -12,6 +12,7 @@ LongSentSignature.class
 class Report < ActiveRecord::Base
   belongs_to :user
   belongs_to :document
+  belongs_to :rewrite_document
 
   state_machine :state, :initial => :new do
     event :initial do

@@ -5,7 +5,7 @@ require "net/http"
 class Document < ActiveRecord::Base
   has_many :shingle_signatures, :dependent => :destroy, :order => 'position_start asc'
   has_many :i_match_signatures, :dependent => :destroy
-  has_many :min_hash_signatures, :dependent => :destroy
+  has_many :min_hash_signatures, :dependent => :destroy, :order => :created_at
   has_many :super_shingle_signatures, :dependent => :destroy
   has_many :mega_shingle_signatures, :dependent => :destroy
   has_many :long_sent_signatures, :dependent => :destroy

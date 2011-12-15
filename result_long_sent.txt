@@ -1,0 +1,6 @@
+long-sent: полнота 0.38, точность 0.9736842105263158 (sinomizer_60)
+long-sent: полнота 0.56, точность 0.9821428571428571 (sinomizer_40)
+long-sent: полнота 0.7, точность 1.0 (sinomizer_20)
+long-sent: полнота 0.8, точность 1.0 (sinomizer_5)
+long-sent: полнота 1.0, точность 0.8 (shuffle_paragraphs)
+long-sent: полнота 1.0, точность 0.73 (shuffle_sentences)

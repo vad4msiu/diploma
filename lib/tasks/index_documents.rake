@@ -11,12 +11,13 @@ namespace :documents do
     if ENV["DIR"]
       index = 1
       ic = Iconv.new('UTF-8//IGNORE', 'UTF-8')
+      Document.destroy_all
       time_all = Benchmark.realtime do
         Find.find(ENV["DIR"]) do |file_path|
           if FileTest.file?(file_path)
             begin
               time = Benchmark.realtime do
-                content = File.read(file_path).gsub(/[^[:word:][:space:][:punct:]]/, '')    
+                content = File.read(file_path).truncate(10_000).gsub(/[^[:word:][:space:][:punct:]]/, '')    
                 Document.create :content => ic.iconv(content + ' ')[0..-2]
               end
               puts "#{index} => Process file #{file_path}, #{time}"

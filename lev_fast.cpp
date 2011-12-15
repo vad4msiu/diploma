@@ -51,10 +51,7 @@ int main(int argc, char *argv[]) {
 	
 	str1.erase(str1.length() - 1);
 	str2.erase(str2.length() - 1);
-	cout << str2.size() << endl;
   distance_levenshtein = edit_distance(str1, str2);
-	cout << "ASD" << endl;
-	cout << distance_levenshtein << endl;
-	cout << (1 - (float)(2 * distance_levenshtein) / (str1.length() + str2.length()));
+	cout << (1 - (float)(2 * distance_levenshtein) / (str1.length() + str2.length())) * 100;
 	return 0;
 }

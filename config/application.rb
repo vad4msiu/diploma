@@ -48,7 +48,10 @@ module Diploma
     
     config.after_initialize do      
       begin
-        DICTIONARY = Word.where(:idf => (5.4)..(5.7)).map(&:term).to_set
+        a = Word.all.map(&:idf).sum
+        b = Word.count
+        c = a / b
+        DICTIONARY = Word.where(:idf => (c - 0.2)..(c + 0.2)).map(&:term).to_set
       rescue Exception => e
         puts  'run migrate!'
       end
