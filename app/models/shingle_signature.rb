@@ -1,6 +1,6 @@
 # -*- encoding : utf-8 -*-
 class ShingleSignature < ActiveRecord::Base
-  SHNINGLE_LENGTH = 6
+  SHNINGLE_LENGTH = 3
   belongs_to :document
   
   validates :token, :presence => true, :uniqueness => true
