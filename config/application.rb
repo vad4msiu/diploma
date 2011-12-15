@@ -50,7 +50,7 @@ module Diploma
       begin
         DICTIONARY = Word.where(:idf => (5.4)..(5.7)).map(&:term).to_set
       rescue Exception => e
-        puts 'run migrate!'
+        puts  'run migrate!'
       end
 
       ALPHABETIC = {'A' => 'А', 'a' => 'а',

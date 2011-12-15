@@ -164,6 +164,7 @@ class Document < ActiveRecord::Base
   end
 
   def similarity_shingle_signatures
+    initialize_for_match
     number_matched = 0
     hash_shingle_signatures = nil
     in_database = []
