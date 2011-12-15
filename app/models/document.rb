@@ -281,7 +281,7 @@ class Document < ActiveRecord::Base
   end
 
   def shuffle_sentences options = {}
-    shuffle_precent = options[:shuffle_precent] || 20
+    shuffle_precent = options[:shuffle_precent] || 30
     sentences = content.clone.split(/[\.!?;]/)
     shuffle_size = (sentences.size.to_f / 100 * shuffle_precent).to_i
     sentences[0...shuffle_size] = sentences[0...shuffle_size].sort_by{ rand }
@@ -290,7 +290,7 @@ class Document < ActiveRecord::Base
   end
 
   def shuffle_paragraphs options = {}
-    shuffle_precent = options[:shuffle_precent] || 10
+    shuffle_precent = options[:shuffle_precent] || 20
     sentences = content.clone.split(/\n/)
     shuffle_size = (sentences.size.to_f / 100 * shuffle_precent).to_i
     sentences[0...shuffle_size] = sentences[0...shuffle_size].sort_by{ rand }

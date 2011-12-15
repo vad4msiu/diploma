@@ -23,8 +23,13 @@ class Shingling
     position_end_words = []
     position_start, position_end = 0, 0
     
+    @content.gsub!(/[#{Diploma::Application::ALPHABETIC.keys.join}]/) do |char| 
+      Diploma::Application::ALPHABETIC[char]
+    end
+    
+    
     @content.each_char do |char|
-      char = @replace_chars[char] if @replace_chars.has_key? char
+      # char = @replace_chars[char] if @replace_chars.has_key? char
       if char !~ /[А-ЯЁа-яё]/
         char_flag = true
       else

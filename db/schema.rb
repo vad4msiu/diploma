@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20111213234948) do
+ActiveRecord::Schema.define(:version => 20111214231411) do
 
   create_table "delayed_jobs", :force => true do |t|
     t.integer  "priority",   :default => 0
@@ -85,6 +85,10 @@ ActiveRecord::Schema.define(:version => 20111213234948) do
     t.text     "json_data"
     t.integer  "document_id"
     t.integer  "report_id"
+    t.string   "rewrite_type"
+    t.boolean  "duplicate"
+    t.float    "sim"
+    t.string   "sim_type"
   end
 
   create_table "shingle_signatures", :force => true do |t|
